@@ -1,0 +1,2139 @@
+<!DOCTYPE html>
+<html lang="es" style="height:100%;overflow:hidden">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#000000" id="themeColorMeta">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Calc+">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="icons/icon-16x16.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="shortcut icon" href="favicon.ico">
+<title>Calc+</title>
+<style>
+/* ─────────────────────────────────────────
+   RESET + BASE
+───────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{height:100%;background:#000}
+html{
+  height:100%;height:100dvh;
+  overflow:hidden;
+  -webkit-text-size-adjust:100%;
+}
+body{
+  width:100%;
+  height:100%;height:100dvh;
+  overflow:hidden;
+  font-family:-apple-system,'SF Pro Display','Helvetica Neue',Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+  display:flex;flex-direction:column;
+  background:var(--bg);color:var(--tx);
+  transition:background .4s,color .4s;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  padding-left:env(safe-area-inset-left,0px);
+  padding-right:env(safe-area-inset-right,0px);
+  touch-action:none;
+  -webkit-user-select:none;
+  user-select:none;
+}
+
+/* ─────────────────────────────────────────
+   THEMES  (dark family)
+───────────────────────────────────────── */
+:root{
+  --bg:#000000;--s1:#0a0a0a;--s2:#111111;--s3:#1c1c1e;
+  --bd:#2c2c2e;--acc:#c8f135;--acr:200,241,53;
+  --acc2:#7b61ff;--ac2r:123,97,255;
+  --tx:#f5f5f5;--tx2:#e0e0e0;--mu:#636366;--du:#3a3a3c;
+  --bfn:#2c2c2e;--bop:#16162a;--beq-fg:#000;
+  --shadow:rgba(0,0,0,.6);
+}
+[data-theme="amoled"]{
+  --bg:#000;--s1:#050505;--s2:#0d0d0d;--s3:#151515;--bd:#202020;
+  --acc:#30d158;--acr:48,209,88;--acc2:#0a84ff;--ac2r:10,132,255;
+  --tx:#f5f5f7;--tx2:#ddd;--mu:#48484a;--du:#2c2c2e;
+  --bfn:#1e1e1e;--bop:#050f1a;--beq-fg:#000;--shadow:rgba(0,0,0,.8);
+}
+[data-theme="ocean"]{
+  --bg:#000d1a;--s1:#011020;--s2:#071a2e;--s3:#0d2438;
+  --bd:#0f2d4a;--acc:#00d4ff;--acr:0,212,255;--acc2:#0055ff;--ac2r:0,85,255;
+  --tx:#dff4ff;--tx2:#b0d8f0;--mu:#2a5575;--du:#103050;
+  --bfn:#0c2035;--bop:#03101e;--beq-fg:#000;--shadow:rgba(0,0,0,.7);
+}
+[data-theme="rose"]{
+  --bg:#09000c;--s1:#110010;--s2:#190016;--s3:#22001e;
+  --bd:#3a0030;--acc:#ff375f;--acr:255,55,95;--acc2:#bf5af2;--ac2r:191,90,242;
+  --tx:#ffe0f0;--tx2:#f0c0d8;--mu:#62203e;--du:#3a1030;
+  --bfn:#240018;--bop:#110008;--beq-fg:#fff;--shadow:rgba(0,0,0,.7);
+}
+[data-theme="amber"]{
+  --bg:#090500;--s1:#110900;--s2:#1a1200;--s3:#241c00;
+  --bd:#362900;--acc:#ffd60a;--acr:255,214,10;--acc2:#ff9f0a;--ac2r:255,159,10;
+  --tx:#fff8e0;--tx2:#f0e0a0;--mu:#5e4e00;--du:#3a3000;
+  --bfn:#261800;--bop:#110900;--beq-fg:#000;--shadow:rgba(0,0,0,.7);
+}
+[data-theme="mint"]{
+  --bg:#000d06;--s1:#001408;--s2:#002010;--s3:#002e18;
+  --bd:#004020;--acc:#00ff95;--acr:0,255,149;--acc2:#00c77a;--ac2r:0,199,122;
+  --tx:#e0fff4;--tx2:#a0f0d0;--mu:#1a5838;--du:#003a20;
+  --bfn:#002210;--bop:#001008;--beq-fg:#000;--shadow:rgba(0,0,0,.7);
+}
+[data-theme="dusk"]{
+  --bg:#0d0a14;--s1:#14101e;--s2:#1c1628;--s3:#261e36;
+  --bd:#342844;--acc:#e879f9;--acr:232,121,249;--acc2:#f59e0b;--ac2r:245,158,11;
+  --tx:#f3e8ff;--tx2:#ddb0f0;--mu:#6b4d8a;--du:#3d2a5a;
+  --bfn:#221830;--bop:#14102a;--beq-fg:#000;--shadow:rgba(0,0,0,.7);
+}
+[data-theme="steel"]{
+  --bg:#080a10;--s1:#0e1018;--s2:#141820;--s3:#1e2230;
+  --bd:#282e40;--acc:#64ffda;--acr:100,255,218;--acc2:#448aff;--ac2r:68,138,255;
+  --tx:#e8f0ff;--tx2:#b0c8e8;--mu:#4a5a7a;--du:#2a3a58;
+  --bfn:#1a2030;--bop:#0c1020;--beq-fg:#000;--shadow:rgba(0,0,0,.7);
+}
+/* ── LIGHT THEMES ── */
+[data-theme="light"]{
+  --bg:#f2f2f7;--s1:#ffffff;--s2:#f2f2f7;--s3:#e5e5ea;
+  --bd:#d1d1d6;--acc:#5e5ce6;--acr:94,92,230;--acc2:#007aff;--ac2r:0,122,255;
+  --tx:#1c1c1e;--tx2:#3a3a3c;--mu:#8e8e93;--du:#c7c7cc;
+  --bfn:#e5e5ea;--bop:#eeeeff;--beq-fg:#fff;--shadow:rgba(0,0,0,.15);
+}
+[data-theme="cream"]{
+  --bg:#faf6f0;--s1:#ffffff;--s2:#f5f0e8;--s3:#ede8e0;
+  --bd:#d8d0c4;--acc:#c0392b;--acr:192,57,43;--acc2:#e67e22;--ac2r:230,126,34;
+  --tx:#2c2416;--tx2:#4a3c28;--mu:#9a8870;--du:#c8bcac;
+  --bfn:#e8e0d4;--bop:#f5e8d0;--beq-fg:#fff;--shadow:rgba(0,0,0,.12);
+}
+[data-theme="sky"]{
+  --bg:#e8f4ff;--s1:#ffffff;--s2:#e0eefc;--s3:#d0e4f8;
+  --bd:#b0ccee;--acc:#0066cc;--acr:0,102,204;--acc2:#00aaff;--ac2r:0,170,255;
+  --tx:#001a33;--tx2:#002244;--mu:#4a7aaa;--du:#90b8d8;
+  --bfn:#d8eaf8;--bop:#cce0ff;--beq-fg:#fff;--shadow:rgba(0,0,0,.12);
+}
+[data-theme="forest"]{
+  --bg:#f0f5f0;--s1:#ffffff;--s2:#e8f2e8;--s3:#d8ead8;
+  --bd:#b0ccb0;--acc:#2d6a2d;--acr:45,106,45;--acc2:#4caf50;--ac2r:76,175,80;
+  --tx:#0a1a0a;--tx2:#1a2e1a;--mu:#4a7a4a;--du:#90bc90;
+  --bfn:#d8e8d8;--bop:#ccf0cc;--beq-fg:#fff;--shadow:rgba(0,0,0,.12);
+}
+
+/* ── SPLASH SCREEN ── */
+.splash{position:fixed;inset:0;z-index:600;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .5s ease,transform .5s ease}
+.splash.hide{opacity:0;transform:scale(1.06);pointer-events:none}
+.splash-logo{width:100px;height:100px;border-radius:28px;background:linear-gradient(135deg,#111,#1c1c1e);border:1px solid #2c2c2e;display:flex;align-items:center;justify-content:center;box-shadow:0 20px 60px rgba(200,241,53,.15);animation:splashPop .6s cubic-bezier(.34,1.56,.64,1) .2s both}
+.splash-logo svg{width:54px;height:54px}
+@keyframes splashPop{0%{opacity:0;transform:scale(.4)}100%{opacity:1;transform:scale(1)}}
+.splash-title{font-size:32px;font-weight:800;letter-spacing:-.5px;color:#f5f5f5;margin-top:20px;animation:splashFadeUp .5s ease .5s both}
+.splash-title span{color:#c8f135}
+.splash-sub{font-size:14px;color:#636366;margin-top:6px;animation:splashFadeUp .5s ease .65s both}
+.splash-dots{display:flex;gap:6px;margin-top:44px;animation:splashFadeUp .5s ease .8s both}
+.splash-dot{width:6px;height:6px;border-radius:50%;background:#2c2c2e;animation:sdPulse 1.4s ease-in-out infinite}
+.splash-dot:nth-child(2){animation-delay:.22s}.splash-dot:nth-child(3){animation-delay:.44s}
+@keyframes sdPulse{0%,80%,100%{background:#2c2c2e;transform:scale(1)}40%{background:#c8f135;transform:scale(1.5)}}
+@keyframes splashFadeUp{0%{opacity:0;transform:translateY(14px)}100%{opacity:1;transform:none}}
+
+/* ─────────────────────────────────────────
+   TOPBAR
+───────────────────────────────────────── */
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:clamp(8px,2vw,14px) clamp(14px,3.5vw,22px) clamp(4px,1vw,8px);
+  flex-shrink:0;z-index:50;
+}
+.app-name{font-size:clamp(16px,2.8vw,20px);font-weight:800;letter-spacing:.01em;color:var(--tx)}
+.app-name span{color:var(--acc)}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.icon-pill{
+  background:var(--s3);border:1px solid var(--bd);color:var(--mu);
+  padding:6px 10px;border-radius:20px;cursor:pointer;font-size:13px;
+  display:flex;align-items:center;gap:5px;transition:all .15s;
+  -webkit-tap-highlight-color:transparent;white-space:nowrap;
+}
+.icon-pill:hover{border-color:var(--acc);color:var(--acc);background:rgba(var(--acr),.08)}
+.menu-wrap{position:relative}
+.dots-btn{
+  background:var(--s3);border:1px solid var(--bd);
+  width:38px;height:38px;border-radius:50%;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  transition:all .15s;-webkit-tap-highlight-color:transparent;
+}
+.dots-btn:hover,.dots-btn.on{border-color:var(--acc);background:rgba(var(--acr),.1)}
+.dot{width:4px;height:4px;border-radius:50%;background:var(--mu);transition:background .15s}
+.dots-btn.on .dot,.dots-btn:hover .dot{background:var(--acc)}
+.dd{
+  position:absolute;top:calc(100% + 8px);right:0;
+  background:var(--s2);border:1px solid var(--bd);border-radius:18px;
+  min-width:220px;overflow:hidden;z-index:200;
+  box-shadow:0 24px 60px var(--shadow);
+  opacity:0;transform:scale(.88) translateY(-8px);transform-origin:top right;
+  pointer-events:none;transition:opacity .18s,transform .18s;
+}
+.dd.on{opacity:1;transform:none;pointer-events:all}
+.ddi{
+  display:flex;align-items:center;gap:12px;padding:14px 18px;
+  cursor:pointer;font-size:14px;border-bottom:1px solid var(--bd);
+  transition:background .1s;-webkit-tap-highlight-color:transparent;color:var(--tx);
+}
+.ddi:last-child{border-bottom:none}
+.ddi:hover,.ddi:active{background:rgba(var(--acr),.08);color:var(--acc)}
+.ddi-i{width:22px;height:22px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.ddi-i svg{width:18px;height:18px}
+
+/* ─────────────────────────────────────────
+   DISPLAY
+───────────────────────────────────────── */
+.display{
+  flex:1;display:flex;flex-direction:column;min-height:0;
+  padding:0 clamp(14px,4vw,28px) clamp(2px,0.5vw,6px);
+  overflow:hidden;touch-action:pan-y;
+}
+/* zona superior */
+.prev-zone{
+  flex-shrink:0;text-align:right;
+  border-bottom:1px solid var(--bd);margin-bottom:clamp(6px,1.5vw,12px);
+  transition:margin .3s,border-color .3s;
+}
+.prev-zone.collapsed{border-bottom-color:transparent;margin-bottom:4px}
+.prev-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:clamp(4px,1vw,8px) 0 0;
+}
+.prev-lbl{font-size:clamp(8px,1.3vw,10px);letter-spacing:.14em;text-transform:uppercase;color:var(--mu);opacity:.55}
+.prev-toggle{
+  background:none;border:1px solid var(--bd);color:var(--mu);
+  border-radius:50%;width:22px;height:22px;cursor:pointer;
+  font-size:10px;display:flex;align-items:center;justify-content:center;
+  transition:all .2s;-webkit-tap-highlight-color:transparent;
+}
+.prev-toggle:hover{border-color:var(--acc);color:var(--acc)}
+.prev-toggle .arr{display:inline-block;transition:transform .3s cubic-bezier(.4,0,.2,1)}
+.prev-zone.collapsed .arr{transform:rotate(-90deg)}
+.prev-body{
+  overflow:hidden;max-height:110px;opacity:1;
+  padding:clamp(3px,1vw,5px) 0 clamp(6px,1.5vw,10px);
+  transition:max-height .32s cubic-bezier(.4,0,.2,1),opacity .25s,padding .3s;
+}
+.prev-zone.collapsed .prev-body{max-height:0;opacity:0;padding:0}
+.prev-op{font-size:clamp(10px,1.6vw,13px);color:var(--mu);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-height:1.2em}
+.prev-res{
+  font-size:clamp(26px,5vw,44px);font-weight:300;letter-spacing:-1px;
+  line-height:1.1;color:var(--acc);min-height:1.1em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .3s,font-size .2s;
+}
+.prev-res.empty{color:var(--du);font-size:clamp(16px,2.8vw,24px);font-weight:200}
+@keyframes slideUp{0%{opacity:0;transform:translateY(14px)}100%{opacity:1;transform:none}}
+.prev-res.pop{animation:slideUp .28s cubic-bezier(.2,0,.2,1)}
+/* zona inferior */
+.cur-zone{flex:1;display:flex;flex-direction:column;justify-content:flex-end;text-align:right}
+.cur-expr{font-size:clamp(13px,2.2vw,17px);color:var(--mu);min-height:1.4em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.cur-num{
+  font-size:clamp(52px,13vw,90px);font-weight:300;line-height:1;
+  letter-spacing:-2px;word-break:break-all;
+  padding-bottom:clamp(4px,1vw,8px);
+  transition:font-size .1s,color .2s;
+}
+.cur-num.md{font-size:clamp(36px,9vw,66px)}
+.cur-num.sm{font-size:clamp(26px,6vw,48px)}
+.cur-num.xs{font-size:clamp(20px,4.5vw,34px)}
+.cur-num.res{color:var(--acc)}
+
+/* ─────────────────────────────────────────
+   BUTTONS
+───────────────────────────────────────── */
+.btns{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:clamp(2px,.5vw,5px);
+  padding:clamp(3px,.8vw,7px) clamp(6px,2vw,14px) clamp(6px,1.5vw,12px);
+  flex-shrink:0;
+}
+.btn{
+  background:var(--s3);border:2px solid transparent;color:var(--tx);
+  font-size:clamp(20px,4.5vw,30px);font-weight:400;
+  height:clamp(54px,11.5dvh,84px);
+  border-radius:clamp(16px,3vw,24px);
+  cursor:pointer;position:relative;overflow:hidden;
+  user-select:none;-webkit-tap-highlight-color:transparent;
+  display:flex;align-items:center;justify-content:center;
+  will-change:transform;-webkit-transform:translateZ(0);transform:translateZ(0);
+  transition:transform 55ms cubic-bezier(.2,0,.2,1),
+             filter 55ms linear,background .22s,
+             box-shadow .2s,border-color .2s;
+}
+.btn:active,.btn.pressing{
+  transform:scale(.87) translateZ(0);filter:brightness(.62);
+  box-shadow:inset 0 3px 10px rgba(0,0,0,.4);
+  transition:transform 35ms cubic-bezier(.2,0,.2,1),filter 35ms linear;
+}
+.btn.release{
+  transform:scale(1.05) translateZ(0);
+  transition:transform 130ms cubic-bezier(.34,1.56,.64,1);
+}
+.btn:hover:not(:active):not(.pressing){filter:brightness(1.18)}
+.btn.fn{background:var(--bfn);color:var(--tx);font-size:clamp(13px,2.8vw,20px);font-weight:600}
+.btn.op{
+  background:var(--bop);color:var(--acc2);font-size:clamp(22px,5vw,34px);font-weight:300;
+  transition:transform 55ms cubic-bezier(.2,0,.2,1),filter 55ms linear,
+             background .22s,border-color .2s,color .2s;
+}
+.btn.op.active{
+  background:rgba(var(--ac2r),.2);border-color:var(--acc2);
+  box-shadow:0 0 0 1px rgba(var(--ac2r),.3);
+}
+.btn.eq{background:var(--acc);color:var(--beq-fg);font-size:clamp(22px,5vw,32px)}
+.btn.bk{background:var(--bfn);font-size:clamp(18px,3.5vw,26px)}
+.rip{
+  position:absolute;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.35) 0%,rgba(255,255,255,.05) 70%);
+  transform:scale(0);animation:rip .5s cubic-bezier(.2,0,.2,1) forwards;pointer-events:none;
+}
+@keyframes rip{0%{transform:scale(0);opacity:1}60%{opacity:.5}100%{transform:scale(6);opacity:0}}
+
+/* ─────────────────────────────────────────
+   TOAST
+───────────────────────────────────────── */
+.toast{
+  position:fixed;bottom:clamp(80px,14vh,110px);left:50%;
+  transform:translateX(-50%) translateY(18px);
+  background:var(--s3);border:1px solid var(--bd);color:var(--tx);
+  padding:10px 22px;border-radius:24px;font-size:13px;letter-spacing:.04em;
+  opacity:0;pointer-events:none;z-index:400;white-space:nowrap;
+  transition:opacity .22s,transform .22s;
+  box-shadow:0 8px 30px rgba(0,0,0,.4);
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ─────────────────────────────────────────
+   OVERLAY + PANELS
+───────────────────────────────────────── */
+.ov{
+  position:fixed;inset:0;background:rgba(0,0,0,.65);
+  z-index:98;opacity:0;pointer-events:none;
+  transition:opacity .28s;backdrop-filter:blur(5px);
+}
+.ov.on{opacity:1;pointer-events:all}
+.panel{
+  position:fixed;top:0;right:-105%;
+  width:min(400px,96vw);height:100%;
+  background:var(--s1);border-left:1px solid var(--bd);
+  z-index:99;display:flex;flex-direction:column;
+  transition:right .3s cubic-bezier(.4,0,.2,1),background .3s,border-color .3s;
+  box-shadow:-28px 0 80px var(--shadow);
+}
+.panel.on{right:0}
+.phdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:clamp(14px,3.5vw,20px) clamp(16px,4vw,22px) clamp(10px,2.5vw,14px);
+  border-bottom:1px solid var(--bd);flex-shrink:0;
+  background:linear-gradient(180deg,var(--s2),var(--s1));
+}
+.ptitle{font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mu)}
+.xbtn{
+  background:none;border:1px solid var(--bd);color:var(--mu);
+  width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:13px;
+  display:flex;align-items:center;justify-content:center;transition:all .15s;
+  -webkit-tap-highlight-color:transparent;
+}
+.xbtn:hover{border-color:#ff453a;color:#ff453a}
+
+/* panel scroll body */
+.pbody{flex:1;overflow-y:auto;padding:clamp(14px,3vw,20px) clamp(16px,4vw,22px);
+  scrollbar-width:thin;scrollbar-color:var(--bd) transparent}
+.pbody::-webkit-scrollbar{width:3px}
+.pbody::-webkit-scrollbar-thumb{background:var(--bd);border-radius:4px}
+.pfoot{flex-shrink:0;padding:clamp(10px,2.5vw,14px) clamp(16px,4vw,22px);border-top:1px solid var(--bd)}
+
+/* ─────────────────────────────────────────
+   SHARED COMPONENTS
+───────────────────────────────────────── */
+.inp{
+  background:var(--s2);border:1.5px solid var(--bd);color:var(--tx);
+  padding:11px 14px;border-radius:13px;font-size:14px;font-family:inherit;
+  outline:none;transition:border-color .15s,box-shadow .15s;width:100%;
+  -webkit-appearance:none;
+}
+.inp:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(var(--acr),.15)}
+.inp::placeholder{color:var(--mu)}
+.inp-sm{padding:9px 12px;font-size:13px;border-radius:11px}
+.row{display:flex;gap:8px;align-items:center}
+.btn-primary{
+  background:var(--acc);color:var(--beq-fg);border:none;
+  padding:12px 18px;border-radius:13px;font-size:14px;font-weight:700;
+  cursor:pointer;transition:filter .1s,transform .08s;
+  -webkit-tap-highlight-color:transparent;white-space:nowrap;
+}
+.btn-primary:active{transform:scale(.94);filter:brightness(.85)}
+.btn-secondary{
+  background:none;border:1.5px solid var(--bd);color:var(--tx2);
+  padding:11px 14px;border-radius:13px;font-size:13px;
+  cursor:pointer;transition:all .15s;white-space:nowrap;
+  -webkit-tap-highlight-color:transparent;
+}
+.btn-secondary:hover{border-color:var(--acc);color:var(--acc)}
+.btn-danger{
+  background:rgba(255,67,58,.07);border:1.5px solid rgba(255,67,58,.22);
+  color:#ff453a;padding:11px;border-radius:13px;font-size:13px;
+  cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;
+}
+.btn-danger:hover{background:rgba(255,67,58,.16)}
+.sec-lbl{
+  font-size:10px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--mu);display:block;margin-bottom:10px;margin-top:18px;opacity:.7;
+}
+.sec-lbl:first-child{margin-top:0}
+.divider{height:1px;background:var(--bd);margin:16px 0}
+.empty-state{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  height:200px;gap:10px;
+}
+.empty-ico{font-size:44px;opacity:.2}
+.empty-txt{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--du)}
+.chip{
+  display:inline-block;padding:3px 9px;border-radius:20px;
+  font-size:10px;letter-spacing:.05em;background:var(--s3);
+  color:var(--mu);border:1px solid var(--bd);
+}
+.chip.green{background:rgba(var(--acr),.12);color:var(--acc);border-color:rgba(var(--acr),.25)}
+.chip.blue{background:rgba(var(--ac2r),.12);color:var(--acc2);border-color:rgba(var(--ac2r),.25)}
+
+/* ─────────────────────────────────────────
+   TUTORIAL OVERLAY
+───────────────────────────────────────── */
+/* ── TUTORIAL MODERNO ── */
+.tutorial{
+  position:fixed;inset:0;z-index:500;
+  background:rgba(0,0,0,.85);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
+  transition:opacity .35s,transform .35s;
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+.tutorial.hide{opacity:0;pointer-events:none;transform:translateY(20px)}
+.tut-sheet{
+  background:var(--s1);
+  border-radius:28px 28px 0 0;
+  width:100%;max-width:480px;
+  overflow:hidden;
+  border-top:1px solid var(--bd);
+  box-shadow:0 -20px 60px rgba(0,0,0,.5);
+}
+.tut-handle{
+  width:36px;height:4px;background:var(--bd);border-radius:2px;
+  margin:12px auto 0;
+}
+.tut-pager{
+  display:flex;overflow:hidden;
+  height:calc(var(--tut-h, 320px));
+  transition:height .35s cubic-bezier(.4,0,.2,1);
+}
+.tut-track{display:flex;width:100%;transition:transform .38s cubic-bezier(.4,0,.2,1);align-items:stretch}
+.tut-slide{
+  min-width:100%;flex-shrink:0;
+  padding:20px 28px 8px;
+  display:flex;flex-direction:column;align-items:center;
+}
+.tut-ico-wrap{
+  width:72px;height:72px;border-radius:22px;
+  background:rgba(var(--acr),.1);border:1px solid rgba(var(--acr),.2);
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:16px;flex-shrink:0;
+}
+.tut-ico-wrap svg{width:34px;height:34px;stroke:var(--acc);stroke-width:1.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.tut-slide-title{font-size:18px;font-weight:800;color:var(--tx);letter-spacing:-.4px;margin-bottom:8px;text-align:center}
+.tut-slide-desc{font-size:13px;color:var(--mu);line-height:1.65;text-align:center;max-width:300px}
+.tut-bottom{padding:16px 24px 24px}
+.tut-dots{display:flex;justify-content:center;gap:5px;margin-bottom:16px}
+.tut-dot{width:5px;height:5px;border-radius:50%;background:var(--bd);transition:all .22s}
+.tut-dot.active{background:var(--acc);width:20px;border-radius:2.5px}
+.tut-btns{display:flex;gap:10px}
+.tut-skip{
+  flex:1;padding:13px;background:var(--s3);border:none;
+  color:var(--mu);border-radius:14px;font-size:13px;font-weight:500;cursor:pointer;
+  transition:all .15s;-webkit-tap-highlight-color:transparent;
+}
+.tut-skip:hover{color:var(--tx)}
+.tut-next{
+  flex:2;padding:13px;background:var(--acc);border:none;
+  color:var(--beq-fg);border-radius:14px;font-size:14px;font-weight:800;
+  cursor:pointer;transition:filter .1s,transform .08s;-webkit-tap-highlight-color:transparent;
+  letter-spacing:.01em;
+}
+.tut-next:active{filter:brightness(.85);transform:scale(.97)}
+
+/* ─────────────────────────────────────────
+   HISTORIAL
+───────────────────────────────────────── */
+.hist-filters{
+  display:flex;gap:6px;padding:10px clamp(16px,4vw,22px);
+  overflow-x:auto;flex-shrink:0;border-bottom:1px solid var(--bd);
+  scrollbar-width:none;
+}
+.hist-filters::-webkit-scrollbar{display:none}
+.hf{
+  background:var(--s3);border:1px solid var(--bd);color:var(--mu);
+  padding:5px 13px;border-radius:20px;font-size:11px;
+  cursor:pointer;white-space:nowrap;flex-shrink:0;
+  transition:all .15s;-webkit-tap-highlight-color:transparent;
+}
+.hf.sel,.hf:hover{background:rgba(var(--acr),.12);border-color:var(--acc);color:var(--acc)}
+.hlist{flex:1;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--bd) transparent}
+.hlist::-webkit-scrollbar{width:3px}
+.hlist::-webkit-scrollbar-thumb{background:var(--bd);border-radius:4px}
+.hi{
+  display:flex;align-items:center;gap:10px;
+  padding:12px clamp(16px,4vw,22px);
+  border-bottom:1px solid rgba(128,128,128,.08);
+  transition:background .1s;animation:fadeIn .2s ease;
+}
+@keyframes fadeIn{from{opacity:0;transform:translateX(8px)}to{opacity:1;transform:none}}
+.hi:hover{background:rgba(var(--acr),.05)}
+.hi:hover .hi-res{color:var(--acc)}
+.hi-main{flex:1;min-width:0;cursor:pointer}
+.hi-tag{display:inline-block;margin-bottom:4px;padding:2px 7px;border-radius:10px;
+  font-size:9px;background:rgba(var(--ac2r),.12);color:var(--acc2);
+  border:1px solid rgba(var(--ac2r),.2)}
+.hi-expr{font-size:11px;color:var(--mu);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hi-res{font-size:clamp(17px,3.5vw,21px);font-weight:300;letter-spacing:-.5px;transition:color .15s}
+.hi-label{font-size:11px;color:var(--acc);font-style:italic;margin-top:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hi-time{font-size:9px;color:var(--du);margin-top:2px}
+.hi-del{background:none;border:none;color:var(--du);font-size:13px;
+  cursor:pointer;padding:8px;border-radius:8px;flex-shrink:0;
+  transition:color .12s,background .12s;-webkit-tap-highlight-color:transparent}
+.hi-del:hover{color:#ff453a;background:rgba(255,67,58,.1)}
+.save-form{
+  background:var(--s2);border:1px solid var(--bd);border-radius:14px;
+  padding:14px;margin-bottom:12px;display:none;
+}
+.save-form.show{display:block}
+
+/* ─────────────────────────────────────────
+   LISTA DE COMPRA
+───────────────────────────────────────── */
+.cart-header{
+  flex-shrink:0;padding:clamp(12px,3vw,18px) clamp(16px,4vw,22px);
+  background:linear-gradient(160deg,var(--s2),var(--s1));
+  border-bottom:1px solid var(--bd);
+}
+.cart-total-row{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:12px}
+.cart-total-lbl{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mu);margin-bottom:3px}
+.cart-total-val{font-size:clamp(30px,6vw,44px);font-weight:300;letter-spacing:-1px;color:var(--acc);line-height:1}
+.cart-count{font-size:11px;color:var(--mu);text-align:right}
+.cart-subs{display:flex;gap:8px}
+.cart-sub{flex:1;background:var(--s3);border-radius:11px;padding:8px 12px;border:1px solid var(--bd)}
+.cart-sub-lbl{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--mu);margin-bottom:2px}
+.cart-sub-val{font-size:clamp(13px,2.5vw,17px);font-weight:500;color:var(--tx2)}
+.cart-sub-val.done{color:var(--acc)}
+.cart-add{flex-shrink:0;padding:10px clamp(16px,4vw,22px);border-bottom:1px solid var(--bd)}
+.cart-row{display:flex;gap:6px;margin-bottom:6px}
+.cart-price-inp{width:78px;flex:none}
+.cart-add-btn{
+  background:var(--acc);color:var(--beq-fg);border:none;
+  padding:10px 14px;border-radius:13px;font-size:20px;font-weight:800;
+  cursor:pointer;flex-shrink:0;transition:filter .1s,transform .08s;
+  -webkit-tap-highlight-color:transparent;
+}
+.cart-add-btn:active{transform:scale(.92);filter:brightness(.8)}
+.cart-currency-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.cart-currency-lbl{font-size:11px;color:var(--mu)}
+.cart-currency-sel{
+  background:var(--s3);border:1px solid var(--bd);color:var(--tx);
+  padding:5px 10px;border-radius:9px;font-size:12px;
+  font-family:inherit;outline:none;cursor:pointer;
+  transition:border-color .15s;-webkit-appearance:none;
+}
+.cart-currency-sel:focus{border-color:var(--acc)}
+.cart-use-calc{
+  width:100%;background:rgba(var(--acr),.07);border:1px solid rgba(var(--acr),.2);
+  color:var(--acc);padding:7px;border-radius:11px;font-size:11px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;
+  transition:all .15s;-webkit-tap-highlight-color:transparent;
+}
+.cart-use-calc:active{background:rgba(var(--acr),.16)}
+.cart-list{flex:1;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--bd) transparent}
+.cart-list::-webkit-scrollbar{width:3px}
+.cart-list::-webkit-scrollbar-thumb{background:var(--bd);border-radius:4px}
+.ci{
+  display:flex;align-items:center;gap:10px;
+  padding:11px clamp(14px,3.5vw,20px);
+  border-bottom:1px solid rgba(128,128,128,.08);
+  transition:opacity .25s;animation:fadeIn .2s ease;
+}
+.ci.checked{opacity:.45}
+.ci-check{
+  width:26px;height:26px;border-radius:50%;border:2px solid var(--bd);
+  flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all .18s;-webkit-tap-highlight-color:transparent;
+  color:transparent;background:transparent;
+}
+.ci.checked .ci-check{background:var(--acc);border-color:var(--acc);color:var(--beq-fg)}
+.ci-check svg{width:12px;height:12px;stroke:var(--beq-fg);stroke-width:3;fill:none;display:none}
+.ci.checked .ci-check svg{display:block}
+.ci-info{flex:1;min-width:0;cursor:pointer}
+.ci-name{font-size:14px;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:all .2s}
+.ci.checked .ci-name{color:var(--mu);text-decoration:line-through}
+.ci-price{font-size:13px;font-weight:600;color:var(--acc);margin-top:2px;transition:color .2s;cursor:pointer}
+.ci-price:hover{opacity:.75}
+.ci.checked .ci-price{color:var(--mu)}
+.ci-actions{display:flex;gap:2px;flex-shrink:0;align-items:center}
+.ci-edit-btn,.ci-del{background:none;border:none;color:var(--du);cursor:pointer;
+  padding:7px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  transition:color .12s,background .12s;-webkit-tap-highlight-color:transparent}
+.ci-edit-btn svg,.ci-del svg{width:14px;height:14px;stroke:currentColor;stroke-width:1.8;fill:none}
+.ci-edit-btn:hover{color:var(--acc2);background:rgba(var(--ac2r),.1)}
+.ci-del:hover{color:#ff453a;background:rgba(255,67,58,.1)}
+/* inline edit */
+.ci-edit-form{display:none;padding:8px clamp(14px,3.5vw,20px) 10px;
+  background:rgba(var(--acr),.04);border-bottom:1px solid var(--bd);gap:8px;
+  align-items:center;}
+.ci-edit-form.open{display:flex}
+.ci-edit-form .inp{flex:1;padding:8px 12px;font-size:13px}
+.ci-edit-form .inp-price{width:80px;flex:none}
+.ci-edit-save{background:var(--acc);color:var(--beq-fg);border:none;padding:8px 14px;
+  border-radius:11px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;
+  -webkit-tap-highlight-color:transparent;}
+.cart-footer{
+  flex-shrink:0;padding:10px clamp(16px,4vw,22px);
+  border-top:1px solid var(--bd);display:flex;gap:8px;
+}
+.cart-footer>*{flex:1}
+
+/* ─────────────────────────────────────────
+   DESCUENTOS
+───────────────────────────────────────── */
+.disc-result-card{
+  background:var(--s2);border:1px solid var(--bd);border-radius:18px;
+  padding:20px;margin-bottom:16px;text-align:center;
+}
+.disc-final-lbl{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mu);margin-bottom:4px}
+.disc-final{font-size:clamp(36px,8vw,54px);font-weight:300;letter-spacing:-2px;color:var(--acc);line-height:1}
+.disc-saving{font-size:14px;color:var(--mu);margin-top:8px}
+.disc-saving span{color:#ff6b6b;font-weight:600}
+.disc-bar-track{height:8px;background:var(--s3);border-radius:4px;overflow:hidden;margin:16px 0 6px}
+.disc-bar-fill{height:100%;border-radius:4px;transition:width .4s cubic-bezier(.4,0,.2,1),background .3s}
+.disc-bar-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--mu);margin-bottom:14px}
+.disc-compare{background:var(--s3);border:1px solid var(--bd);border-radius:13px;padding:13px;margin-top:6px}
+.disc-cmp-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;
+  border-bottom:1px solid rgba(128,128,128,.08)}
+.disc-cmp-row:last-child{border-bottom:none;font-weight:600}
+.disc-cmp-lbl{font-size:13px;color:var(--mu)}
+.disc-cmp-val{font-size:14px;font-weight:500}
+.disc-cmp-val.pos{color:var(--acc)}.disc-cmp-val.neg{color:#ff6b6b}
+
+/* ─────────────────────────────────────────
+   SPLIT
+───────────────────────────────────────── */
+.split-result-card{
+  background:var(--s2);border:1px solid var(--bd);border-radius:18px;
+  padding:20px;text-align:center;margin-bottom:16px;
+}
+.split-pp-lbl{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mu);margin-bottom:4px}
+.split-pp{font-size:clamp(36px,8vw,54px);font-weight:300;letter-spacing:-2px;color:var(--acc);line-height:1}
+.split-pp-sub{font-size:13px;color:var(--mu);margin-top:8px}
+.split-breakdown{background:var(--s3);border:1px solid var(--bd);border-radius:13px;padding:12px;margin-top:12px}
+.split-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;
+  border-bottom:1px solid rgba(128,128,128,.08)}
+.split-row:last-child{border-bottom:none}
+.split-row-lbl{font-size:13px;color:var(--mu)}
+.split-row-val{font-size:14px;font-weight:500;color:var(--tx)}
+.stepper{display:flex;align-items:center;justify-content:center;gap:16px;margin:10px 0}
+.stepper-btn{
+  background:var(--s3);border:1.5px solid var(--bd);color:var(--tx);
+  width:38px;height:38px;border-radius:50%;font-size:22px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:all .15s;
+  -webkit-tap-highlight-color:transparent;
+}
+.stepper-btn:hover{border-color:var(--acc);color:var(--acc)}
+.stepper-val{font-size:clamp(22px,4vw,30px);font-weight:300;min-width:44px;text-align:center}
+
+/* ─────────────────────────────────────────
+   AJUSTES
+───────────────────────────────────────── */
+.theme-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:4px}
+.tc{
+  border:2px solid var(--bd);border-radius:13px;padding:10px 5px;
+  cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;
+  transition:all .18s;background:var(--s2);-webkit-tap-highlight-color:transparent;
+}
+.tc:hover{transform:scale(1.05);border-color:var(--mu)}
+.tc.sel{border-color:var(--acc)}
+.tc-preview{
+  width:36px;height:36px;border-radius:9px;
+  display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;
+  overflow:hidden;gap:2px;
+}
+.tc-preview span{display:block}
+.tc-name{font-size:9px;color:var(--mu);text-align:center}
+.tc.sel .tc-name{color:var(--acc)}
+.install-bar{
+  display:none;align-items:center;justify-content:space-between;
+  padding:11px 16px;background:rgba(var(--acr),.08);
+  border:1px solid rgba(var(--acr),.22);border-radius:13px;
+  margin-bottom:16px;gap:10px;
+}
+.install-bar.show{display:flex}
+.install-txt{font-size:12px;color:var(--tx);flex:1}
+.install-btn{background:var(--acc);color:var(--beq-fg);border:none;padding:7px 14px;
+  border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0}
+.install-x{background:none;border:none;color:var(--mu);font-size:16px;cursor:pointer;padding:2px 6px}
+.s-row{display:flex;align-items:center;justify-content:space-between;
+  padding:13px 0;border-bottom:1px solid var(--bd)}
+.s-row:last-child{border-bottom:none}
+.s-row-label{font-size:14px;color:var(--tx)}
+.s-row-sub{font-size:11px;color:var(--mu);margin-top:2px}
+.currency-sel{
+  background:var(--s2);border:1.5px solid var(--bd);color:var(--tx);
+  padding:9px 12px;border-radius:11px;font-size:13px;font-family:inherit;
+  outline:none;cursor:pointer;transition:border-color .15s;
+  -webkit-appearance:none;width:100%;
+}
+.currency-sel:focus{border-color:var(--acc)}
+
+/* ══════════════════════════════════════════
+   [NUEVO] PRESUPUESTO DINÁMICO
+══════════════════════════════════════════ */
+.budget-bar-wrap{
+  margin-top:10px;padding:0;
+}
+.budget-row{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:6px;
+}
+.budget-label{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mu)}
+.budget-remaining{font-size:13px;font-weight:600;color:var(--acc);transition:color .3s}
+.budget-remaining.warn{color:#ff9f0a}
+.budget-remaining.over{color:#ff453a}
+.budget-track{
+  height:6px;background:var(--s3);border-radius:3px;overflow:hidden;
+  border:1px solid var(--bd);
+}
+.budget-fill{
+  height:100%;border-radius:3px;
+  background:var(--acc);
+  transition:width .4s cubic-bezier(.4,0,.2,1),background .3s;
+  max-width:100%;
+}
+.budget-fill.warn{background:#ff9f0a}
+.budget-fill.over{background:#ff453a;width:100%!important}
+.budget-inp-row{
+  display:flex;align-items:center;gap:8px;margin-top:10px;
+}
+.budget-inp-lbl{font-size:11px;color:var(--mu);white-space:nowrap;flex-shrink:0}
+.budget-inp{
+  flex:1;background:var(--s3);border:1.5px solid var(--bd);color:var(--tx);
+  padding:7px 10px;border-radius:10px;font-size:13px;font-family:inherit;
+  outline:none;transition:border-color .15s;-webkit-appearance:none;
+}
+.budget-inp:focus{border-color:var(--acc)}
+
+/* ══════════════════════════════════════════
+   [NUEVO] ALERTA PRESUPUESTO
+══════════════════════════════════════════ */
+.budget-alert{
+  position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);
+  left:50%;transform:translateX(-50%) translateY(-80px);
+  background:var(--s3);border:1.5px solid #ff9f0a;color:#ff9f0a;
+  padding:10px 18px;border-radius:16px;font-size:13px;font-weight:600;
+  z-index:350;white-space:nowrap;
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1),opacity .3s;
+  opacity:0;pointer-events:none;
+  box-shadow:0 8px 30px rgba(0,0,0,.4);
+  display:flex;align-items:center;gap:8px;
+}
+.budget-alert.over{border-color:#ff453a;color:#ff453a}
+.budget-alert.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+/* ══════════════════════════════════════════
+   [NUEVO] HISTORIAL DE LISTAS GUARDADAS
+══════════════════════════════════════════ */
+.saved-lists-panel{
+  border-top:1px solid var(--bd);margin-top:0;flex-shrink:0;
+}
+.saved-lists-toggle{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px clamp(14px,3.5vw,20px);cursor:pointer;
+  font-size:12px;color:var(--mu);letter-spacing:.05em;
+  transition:color .15s;-webkit-tap-highlight-color:transparent;
+}
+.saved-lists-toggle:hover{color:var(--acc)}
+.saved-lists-toggle .sl-arr{transition:transform .25s}
+.saved-lists-toggle.open .sl-arr{transform:rotate(180deg)}
+.saved-lists-body{
+  max-height:0;overflow:hidden;
+  transition:max-height .3s cubic-bezier(.4,0,.2,1);
+}
+.saved-lists-body.open{max-height:260px;overflow-y:auto}
+.sl-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px clamp(14px,3.5vw,20px);
+  border-top:1px solid rgba(128,128,128,.06);
+  transition:background .1s;
+}
+.sl-item:hover{background:rgba(var(--acr),.05)}
+.sl-info{flex:1;min-width:0;cursor:pointer}
+.sl-name{font-size:13px;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sl-meta{font-size:10px;color:var(--mu);margin-top:2px}
+.sl-actions{display:flex;gap:4px;flex-shrink:0}
+.sl-load-btn,.sl-del-btn{
+  background:none;border:1px solid var(--bd);
+  padding:5px 9px;border-radius:8px;font-size:11px;cursor:pointer;
+  transition:all .12s;-webkit-tap-highlight-color:transparent;
+  white-space:nowrap;
+}
+.sl-load-btn{color:var(--acc);border-color:rgba(var(--acr),.3)}
+.sl-load-btn:hover{background:rgba(var(--acr),.1)}
+.sl-del-btn{color:var(--mu);border-color:var(--bd)}
+.sl-del-btn:hover{color:#ff453a;border-color:rgba(255,67,58,.3)}
+.sl-empty{padding:20px;text-align:center;font-size:12px;color:var(--du)}
+
+/* ══════════════════════════════════════════
+   [NUEVO] FEEDBACK VISUAL AL AGREGAR
+══════════════════════════════════════════ */
+@keyframes itemPop{
+  0%{opacity:0;transform:translateX(20px) scale(.95)}
+  60%{transform:translateX(-4px) scale(1.01)}
+  100%{opacity:1;transform:none}
+}
+.ci.new-item{animation:itemPop .3s cubic-bezier(.34,1.56,.64,1)}
+
+/* ══════════════════════════════════════════
+   [NUEVO] MODO PRO BADGE (base)
+══════════════════════════════════════════ */
+.pro-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  background:linear-gradient(135deg,#ffd60a,#ff9f0a);
+  color:#000;padding:2px 8px;border-radius:20px;
+  font-size:9px;font-weight:800;letter-spacing:.08em;
+  margin-left:6px;vertical-align:middle;
+}
+.pro-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:13px 0;border-bottom:1px solid var(--bd);
+}
+.pro-cta{
+  background:linear-gradient(135deg,#ffd60a,#ff9f0a);color:#000;
+  border:none;padding:8px 16px;border-radius:10px;font-size:12px;
+  font-weight:700;cursor:pointer;transition:filter .15s;
+  -webkit-tap-highlight-color:transparent;
+}
+.pro-cta:hover{filter:brightness(1.1)}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ SPLASH ═══════════════ -->
+<div class="splash" id="splash" style="display:none">
+  <div class="splash-logo">
+    <svg viewBox="0 0 54 54" fill="none">
+      <text x="4" y="38" font-family="-apple-system,Helvetica Neue,Arial" font-size="36" font-weight="800" fill="#f5f5f5">C</text>
+      <text x="32" y="46" font-family="-apple-system,Helvetica Neue,Arial" font-size="22" font-weight="300" fill="#c8f135">+</text>
+    </svg>
+  </div>
+  <div class="splash-title">Calc<span>+</span></div>
+  <div class="splash-sub">Tu calculadora inteligente</div>
+  <div class="splash-dots">
+    <div class="splash-dot"></div>
+    <div class="splash-dot"></div>
+    <div class="splash-dot"></div>
+  </div>
+</div>
+
+<!-- ═══════════════ TUTORIAL ═══════════════ -->
+<div class="tutorial" id="tutorial">
+  <div class="tut-sheet">
+    <div class="tut-handle"></div>
+    <div class="tut-pager">
+      <div class="tut-track" id="tutTrack">
+
+        <div class="tut-slide">
+          <div class="tut-ico-wrap">
+            <svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><path d="M13 16.5h7M16.5 13v7"/></svg>
+          </div>
+          <div class="tut-slide-title">Calculadora fluida</div>
+          <div class="tut-slide-desc">Mantén pulsado el resultado para copiarlo. Desliza ← en pantalla para borrar. Compatible con teclado físico.</div>
+        </div>
+
+        <div class="tut-slide">
+          <div class="tut-ico-wrap">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+          </div>
+          <div class="tut-slide-title">Historial con etiquetas</div>
+          <div class="tut-slide-desc">Guarda cálculos con nombre ("presupuesto viaje") y categoría. Filtra y recupera cualquier resultado al instante.</div>
+        </div>
+
+        <div class="tut-slide">
+          <div class="tut-ico-wrap">
+            <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+          </div>
+          <div class="tut-slide-title">Lista de compra</div>
+          <div class="tut-slide-desc">Añade artículos con precio. Toca el precio para editarlo. Marca lo que ya echaste al carro. Total en tiempo real.</div>
+        </div>
+
+        <div class="tut-slide">
+          <div class="tut-ico-wrap">
+            <svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+          </div>
+          <div class="tut-slide-title">Descuentos visuales</div>
+          <div class="tut-slide-desc">Introduce precio y descuento. Ve el ahorro con barra animada. Envía el precio final directo a la calculadora.</div>
+        </div>
+
+        <div class="tut-slide">
+          <div class="tut-ico-wrap">
+            <svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/><path d="M2 20c0-3.3 2.7-6 6-6h8c3.3 0 6 2.7 6 6"/><line x1="12" y1="12" x2="12" y2="20"/></svg>
+          </div>
+          <div class="tut-slide-title">Split de gastos</div>
+          <div class="tut-slide-desc">Divide la cuenta de una cena. Propina + personas ajustables. El resultado va directo a la calculadora.</div>
+        </div>
+
+        <div class="tut-slide">
+          <div class="tut-ico-wrap" style="background:rgba(var(--acr),.15);border-color:var(--acc)">
+            <svg viewBox="0 0 24 24" style="stroke:var(--acc)"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          </div>
+          <div class="tut-slide-title">Instala la app</div>
+          <div class="tut-slide-desc">Funciona 100% sin internet. Ve a Ajustes → Instalar para añadirla a tu pantalla de inicio como app nativa.</div>
+        </div>
+
+      </div>
+    </div>
+    <div class="tut-bottom">
+      <div class="tut-dots" id="tutDots"></div>
+      <div class="tut-btns">
+        <button class="tut-skip" onclick="closeTutorial()">Saltar</button>
+        <button class="tut-next" id="tutNext" onclick="tutStep()">Siguiente</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ TOPBAR ═══════════════ -->
+<div class="topbar">
+  <span class="app-name">Calc<span>+</span></span>
+  <div class="topbar-right">
+    <!-- [NUEVO] Badge total carrito siempre visible -->
+    <button class="icon-pill" onclick="openPanel('cart')" id="cartPillBtn" style="display:none">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+      <span id="cartBadge" style="display:none"></span>
+    </button>
+    <button class="icon-pill" onclick="openPanel('disc')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg> Dto.</button>
+    <button class="icon-pill" onclick="openPanel('split')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/><path d="M2 20c0-3.3 2.7-6 6-6h8c3.3 0 6 2.7 6 6"/></svg> Split</button>
+    <div class="menu-wrap">
+      <button class="dots-btn" id="dotsBtn" onclick="toggleMenu()">
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      </button>
+      <div class="dd" id="ddMenu">
+        <div class="ddi" onclick="openPanel('hist')"><span class="ddi-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg></span>Historial</div>
+        <div class="ddi" onclick="openPanel('cart')"><span class="ddi-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg></span>Lista de compra</div>
+        <div class="ddi" onclick="openPanel('disc')"><span class="ddi-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></span>Descuentos</div>
+        <div class="ddi" onclick="openPanel('split')"><span class="ddi-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/><path d="M2 20c0-3.3 2.7-6 6-6h8c3.3 0 6 2.7 6 6"/><line x1="12" y1="12" x2="12" y2="20"/></svg></span>Split de gastos</div>
+        <div class="ddi" onclick="openPanel('cfg')"><span class="ddi-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></span>Ajustes</div>
+        <div class="ddi" onclick="openTutorial()"><span class="ddi-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>Tutorial</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ DISPLAY ═══════════════ -->
+<div class="display" id="display">
+  <div class="prev-zone" id="prevZone">
+    <div class="prev-hdr">
+      <span class="prev-lbl">Resultado anterior</span>
+      <button class="prev-toggle" onclick="togglePrev()"><span class="arr">▾</span></button>
+    </div>
+    <div class="prev-body">
+      <div class="prev-op" id="pOp"></div>
+      <div class="prev-res empty" id="pRes">—</div>
+    </div>
+  </div>
+  <div class="cur-zone">
+    <div class="cur-expr" id="cExpr"></div>
+    <div class="cur-num" id="cNum">0</div>
+  </div>
+</div>
+
+<!-- ═══════════════ BUTTONS ═══════════════ -->
+<div class="btns" id="btns">
+  <button class="btn fn" data-a="ac">AC</button>
+  <button class="btn fn" data-a="sg">+/−</button>
+  <button class="btn fn" data-a="pc">%</button>
+  <button class="btn op" data-a="op" data-op="÷">÷</button>
+  <button class="btn" data-a="d" data-v="7">7</button>
+  <button class="btn" data-a="d" data-v="8">8</button>
+  <button class="btn" data-a="d" data-v="9">9</button>
+  <button class="btn op" data-a="op" data-op="×">×</button>
+  <button class="btn" data-a="d" data-v="4">4</button>
+  <button class="btn" data-a="d" data-v="5">5</button>
+  <button class="btn" data-a="d" data-v="6">6</button>
+  <button class="btn op" data-a="op" data-op="−">−</button>
+  <button class="btn" data-a="d" data-v="1">1</button>
+  <button class="btn" data-a="d" data-v="2">2</button>
+  <button class="btn" data-a="d" data-v="3">3</button>
+  <button class="btn op" data-a="op" data-op="+">+</button>
+  <button class="btn bk" data-a="bk">⌫</button>
+  <button class="btn" data-a="d" data-v="0">0</button>
+  <button class="btn fn" data-a="dt">.</button>
+  <button class="btn eq" data-a="eq">=</button>
+</div>
+
+<!-- [NUEVO] Alerta presupuesto -->
+<div class="budget-alert" id="budgetAlert"></div>
+<div class="toast" id="toast"></div>
+<div class="ov" id="ov" onclick="closeAll()"></div>
+
+<!-- ═══════════ PANEL: PRIVACIDAD ═══════════ -->
+<div class="panel" id="panPrivacy">
+  <div class="phdr"><span class="ptitle">Política de privacidad</span><button class="xbtn" onclick="closeAll()">✕</button></div>
+  <div class="pbody" style="-webkit-user-select:text;user-select:text">
+    <span class="sec-lbl">Calc+ · Política de privacidad</span>
+    <div style="font-size:13px;color:var(--tx2);line-height:1.7;margin-bottom:16px">
+      <strong>Última actualización:</strong> 25/03/2026
+    </div>
+    <div style="font-size:13px;color:var(--mu);line-height:1.75">
+      <p style="margin-bottom:12px"><strong style="color:var(--tx)">1. Datos que recopilamos</strong><br>
+      Calc+ no recopila, transmite ni almacena ningún dato personal en servidores externos. Toda la información (historial de cálculos, listas de compra, presupuestos, ajustes) se guarda únicamente en el almacenamiento local de tu dispositivo (<em>localStorage</em>).</p>
+
+      <p style="margin-bottom:12px"><strong style="color:var(--tx)">2. Uso de datos</strong><br>
+      Los datos almacenados localmente se usan exclusivamente para el funcionamiento de la app (recordar tu historial, listas y preferencias). No se comparten con terceros.</p>
+
+      <p style="margin-bottom:12px"><strong style="color:var(--tx)">3. Conexión a internet</strong><br>
+      Calc+ funciona completamente sin conexión a internet. No realiza peticiones a servidores externos ni usa analíticas, publicidad o rastreadores.</p>
+
+      <p style="margin-bottom:12px"><strong style="color:var(--tx)">4. Permisos</strong><br>
+      La app puede solicitar permiso de vibración (feedback háptico) y notificaciones push (alertas de presupuesto). Ambos son opcionales y se pueden revocar desde los ajustes del dispositivo.</p>
+
+      <p style="margin-bottom:12px"><strong style="color:var(--tx)">5. Menores</strong><br>
+      Calc+ no está dirigida a menores de 13 años ni recopila datos de menores.</p>
+
+      <p style="margin-bottom:12px"><strong style="color:var(--tx)">6. Cambios</strong><br>
+      Si modificamos esta política, actualizaremos la fecha en el encabezado. El uso continuado de la app implica aceptación de los cambios.</p>
+
+      <p><strong style="color:var(--tx)">7. Contacto</strong><br>
+      Para cualquier consulta sobre privacidad, puedes abrir un issue en el repositorio de GitHub del proyecto.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ PANEL: HISTORIAL ═══════════ -->
+<div class="panel" id="panHist">
+  <div class="phdr"><span class="ptitle">🕐 Historial</span><button class="xbtn" onclick="closeAll()">✕</button></div>
+  <div class="hist-filters" id="histFilters"></div>
+  <div class="hlist" id="hlist"></div>
+  <div class="pfoot">
+    <div class="save-form" id="saveForm">
+      <div style="font-size:11px;color:var(--mu);margin-bottom:10px">Etiquetar último cálculo</div>
+      <input class="inp inp-sm" id="saveLabel" placeholder="Nombre (ej: presupuesto viaje)" style="margin-bottom:8px">
+      <input class="inp inp-sm" id="saveTag" placeholder="Categoría (ej: hogar, trabajo…)" style="margin-bottom:10px">
+      <div class="row">
+        <button class="btn-primary" onclick="doSaveLabel()" style="flex:1">Guardar</button>
+        <button class="btn-secondary" onclick="hideSaveForm()">Cancelar</button>
+      </div>
+    </div>
+    <div class="row" id="histFooter">
+      <button class="btn-primary" onclick="showSaveForm()" style="flex:1;font-size:13px">🏷 Etiquetar</button>
+      <button class="btn-danger" style="flex:1" onclick="clearHist()">Borrar todo</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ PANEL: LISTA COMPRA ═══════════ -->
+<div class="panel" id="panCart">
+  <div class="phdr"><span class="ptitle">🛒 Lista de compra</span><button class="xbtn" onclick="closeAll()">✕</button></div>
+  <div class="cart-header">
+    <div class="cart-total-row">
+      <div>
+        <div class="cart-total-lbl">Total</div>
+        <div class="cart-total-val" id="cartTotal">—</div>
+      </div>
+      <div class="cart-count" id="cartCount"></div>
+    </div>
+    <div class="cart-subs">
+      <div class="cart-sub"><div class="cart-sub-lbl">En el carro</div><div class="cart-sub-val done" id="cartDone">—</div></div>
+      <div class="cart-sub"><div class="cart-sub-lbl">Pendiente</div><div class="cart-sub-val" id="cartPend">—</div></div>
+    </div>
+    <!-- [NUEVO] Presupuesto dinámico -->
+    <div class="budget-bar-wrap" id="budgetWrap" style="display:none">
+      <div class="budget-row">
+        <span class="budget-label">Presupuesto</span>
+        <span class="budget-remaining" id="budgetRemaining"></span>
+      </div>
+      <div class="budget-track"><div class="budget-fill" id="budgetFill"></div></div>
+    </div>
+    <div class="budget-inp-row">
+      <span class="budget-inp-lbl">Presupuesto:</span>
+      <input class="budget-inp" id="budgetInput" type="number" placeholder="0.00" inputmode="decimal" min="0" step="0.01" oninput="budgetUpdate()">
+    </div>
+  </div>
+  <div class="cart-add">
+    <div class="cart-currency-row">
+      <span class="cart-currency-lbl">Moneda:</span>
+      <select class="cart-currency-sel" id="cartCurrencySel" onchange="setCartCurrency(this.value)"></select>
+    </div>
+    <div class="cart-row">
+      <input class="inp inp-sm" id="cartName" placeholder="Artículo…" maxlength="40" autocomplete="off" style="flex:1">
+      <input class="inp inp-sm cart-price-inp" id="cartPrice" type="number" placeholder="0.00" min="0" step="0.01" inputmode="decimal">
+      <button class="cart-add-btn" onclick="cartAdd()">+</button>
+    </div>
+    <button class="cart-use-calc" onclick="cartUseCalc()">⟵ Usar resultado de la calculadora</button>
+  </div>
+  <div class="cart-list" id="cartList"></div>
+  <!-- [NUEVO] Historial de listas guardadas -->
+  <div class="saved-lists-panel" id="savedListsPanel">
+    <div class="saved-lists-toggle" id="savedListsToggle" onclick="toggleSavedLists()">
+      <span>📋 Listas guardadas (<span id="savedListsCount">0</span>)</span>
+      <svg class="sl-arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="saved-lists-body" id="savedListsBody"></div>
+  </div>
+  <div class="cart-footer">
+    <button class="btn-secondary" onclick="cartUncheck()">Desmarcar todo</button>
+    <button class="btn-secondary" onclick="cartSaveList()">💾 Guardar lista</button>
+    <button class="btn-danger" onclick="cartClear()">Vaciar</button>
+  </div>
+</div>
+
+<!-- ═══════════ PANEL: DESCUENTOS ═══════════ -->
+<div class="panel" id="panDisc">
+  <div class="phdr"><span class="ptitle">🏷️ Descuentos</span><button class="xbtn" onclick="closeAll()">✕</button></div>
+  <div class="pbody">
+    <div class="disc-result-card">
+      <div class="disc-final-lbl">Precio final</div>
+      <div class="disc-final" id="discFinal">—</div>
+      <div class="disc-saving" id="discSaving"></div>
+      <div class="disc-bar-track"><div class="disc-bar-fill" id="discBar" style="width:100%;background:var(--acc)"></div></div>
+      <div class="disc-bar-labels"><span id="discBarL">Precio original</span><span id="discBarR"></span></div>
+    </div>
+    <span class="sec-lbl">Precio original</span>
+    <input class="inp" id="discPrice" type="number" placeholder="89.99" inputmode="decimal" oninput="calcDisc()">
+    <span class="sec-lbl">Descuento (%)</span>
+    <input class="inp" id="discPct" type="number" placeholder="30" min="0" max="100" inputmode="decimal" oninput="calcDisc()">
+    <div class="disc-compare" id="discCompare" style="display:none;margin-top:16px">
+      <div class="disc-cmp-row"><span class="disc-cmp-lbl">Precio original</span><span class="disc-cmp-val neg" id="dcOrig"></span></div>
+      <div class="disc-cmp-row"><span class="disc-cmp-lbl">Descuento</span><span class="disc-cmp-val pos" id="dcDisc"></span></div>
+      <div class="disc-cmp-row"><span class="disc-cmp-lbl">Precio final</span><span class="disc-cmp-val pos" id="dcFinal"></span></div>
+      <div class="disc-cmp-row"><span class="disc-cmp-lbl">Ahorro total</span><span class="disc-cmp-val pos" id="dcSave"></span></div>
+    </div>
+    <div class="row" style="margin-top:16px;gap:8px">
+      <button class="btn-primary" onclick="discToCalc()" style="flex:1">Enviar a calculadora</button>
+      <button class="btn-secondary" onclick="discClear()">Limpiar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ PANEL: SPLIT ═══════════ -->
+<div class="panel" id="panSplit">
+  <div class="phdr"><span class="ptitle">🍽️ Split de gastos</span><button class="xbtn" onclick="closeAll()">✕</button></div>
+  <div class="pbody">
+    <div class="split-result-card">
+      <div class="split-pp-lbl">Por persona</div>
+      <div class="split-pp" id="splitPP">—</div>
+      <div class="split-pp-sub" id="splitSub"></div>
+      <div class="split-breakdown" id="splitBreak" style="display:none">
+        <div class="split-row"><span class="split-row-lbl">Subtotal</span><span class="split-row-val" id="spBase"></span></div>
+        <div class="split-row"><span class="split-row-lbl">Propina (<span id="spTipPct">0</span>%)</span><span class="split-row-val" id="spTip"></span></div>
+        <div class="split-row"><span class="split-row-lbl">Total con propina</span><span class="split-row-val" id="spTotal"></span></div>
+        <div class="split-row"><span class="split-row-lbl">Personas</span><span class="split-row-val" id="spN"></span></div>
+      </div>
+    </div>
+    <span class="sec-lbl">Total de la cuenta</span>
+    <input class="inp" id="splitTotal" type="number" placeholder="120.00" inputmode="decimal" oninput="calcSplit()">
+    <span class="sec-lbl">Propina (%)</span>
+    <input class="inp" id="splitTip" type="number" placeholder="10" min="0" max="100" inputmode="decimal" oninput="calcSplit()">
+    <span class="sec-lbl">Personas</span>
+    <div class="stepper">
+      <button class="stepper-btn" onclick="splitAdj(-1)">−</button>
+      <div class="stepper-val" id="splitN">2</div>
+      <button class="stepper-btn" onclick="splitAdj(1)">+</button>
+    </div>
+    <div class="row" style="margin-top:16px;gap:8px">
+      <button class="btn-primary" onclick="splitToCalc()" style="flex:1">Enviar a calculadora</button>
+      <button class="btn-secondary" onclick="splitClear()">Limpiar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ PANEL: AJUSTES ═══════════ -->
+<div class="panel" id="panCfg">
+  <div class="phdr"><span class="ptitle">⚙️ Ajustes</span><button class="xbtn" onclick="closeAll()">✕</button></div>
+  <div class="pbody">
+    <div class="install-bar" id="installBar">
+      <span class="install-txt">📲 Instalar como app</span>
+      <button class="install-btn" onclick="doInstall()">Instalar</button>
+      <button class="install-x" onclick="hideInstall()">✕</button>
+    </div>
+    <span class="sec-lbl">Tema oscuro</span>
+    <div class="theme-grid" id="themeGridDark"></div>
+    <span class="sec-lbl" style="margin-top:16px">Tema claro</span>
+    <div class="theme-grid" id="themeGridLight"></div>
+    <div class="divider"></div>
+    <span class="sec-lbl">Moneda base</span>
+    <select class="currency-sel" id="baseCurrencySel" onchange="setBaseCurrency(this.value)"></select>
+    <div class="divider"></div>
+    <div class="s-row"><div><div class="s-row-label">Versión</div><div class="s-row-sub">1.0 · Funciona sin internet</div></div></div>
+    <div class="s-row"><div><div class="s-row-label">Mantén el resultado</div><div class="s-row-sub">Copia el número al portapapeles</div></div></div>
+    <div class="s-row"><button class="btn-secondary" style="width:100%;margin-top:4px" onclick="openTutorial();closeAll()">Ver tutorial de nuevo</button></div>
+    <div class="divider"></div>
+    <!-- [NUEVO] Modo Pro (base preparada) -->
+    <span class="sec-lbl">Versión <span class="pro-badge">PRO</span></span>
+    <div class="pro-row">
+      <div>
+        <div class="s-row-label">Calc+ Pro</div>
+        <div class="s-row-sub">Sin límites · Sin publicidad</div>
+      </div>
+      <button class="pro-cta" onclick="showProInfo()">Ver más</button>
+    </div>
+    <div class="pro-row" style="border:none">
+      <div>
+        <div class="s-row-label">Política de privacidad</div>
+        <div class="s-row-sub">Tus datos nunca salen del dispositivo</div>
+      </div>
+      <button class="btn-secondary" style="font-size:11px" onclick="openPrivacy()">Ver</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+/* ═══════════════════════════════════════════
+   CALCULADORA — máquina de estados
+   A = escribiendo 1er num
+   B = operador pulsado, esperando 2º
+   C = escribiendo 2º num
+   D = resultado mostrado
+═══════════════════════════════════════════ */
+var S = 'A', n1 = 0, op = '', cur = '0';
+var hist = [], activePanel = null;
+
+var elNum  = document.getElementById('cNum');
+var elExpr = document.getElementById('cExpr');
+var elPOp  = document.getElementById('pOp');
+var elPRes = document.getElementById('pRes');
+var elOv   = document.getElementById('ov');
+var ddMenu = document.getElementById('ddMenu');
+var dotsBtn= document.getElementById('dotsBtn');
+var toastEl= document.getElementById('toast');
+
+/* ── formateo ── */
+function fmt(val) {
+  var s = String(val);
+  if (s === 'Error' || s.indexOf('e') !== -1) return s;
+  var n = parseFloat(s); if (isNaN(n)) return s;
+  n = Math.round(n * 1e10) / 1e10; s = String(n);
+  var parts = s.split('.'), ip = parts[0], dp = parts[1];
+  var neg = ip[0] === '-', abs = neg ? ip.slice(1) : ip, out = '';
+  for (var i = 0; i < abs.length; i++) { if (i > 0 && (abs.length - i) % 3 === 0) out += '.'; out += abs[i]; }
+  var r = (neg ? '-' : '') + out;
+  if (dp !== undefined) r += ',' + dp;
+  return r;
+}
+function fmtCur(n, sym) { return fmt(n) + ' ' + (sym || baseCurrency); }
+function szCls(s) { var l = s.replace(/\s/g,'').length; return l>18?' xs':l>13?' sm':l>9?' md':''; }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function r2(n) { return Math.round(n * 100) / 100; }
+
+/* ── render ── */
+function render() {
+  var big, isRes = false;
+  if (S === 'A') { big = fmt(cur); elExpr.textContent = ''; opHL(null); }
+  else if (S === 'B') { big = fmt(n1) + ' ' + op; elExpr.textContent = ''; opHL(op); }
+  else if (S === 'C') { big = fmt(n1) + ' ' + op + ' ' + fmt(cur); elExpr.textContent = ''; opHL(op); }
+  else { big = '= ' + fmt(cur); isRes = true; elExpr.textContent = elPOp.textContent; opHL(null); }
+  elNum.textContent = big;
+  elNum.className = 'cur-num' + szCls(big) + (isRes ? ' res' : '');
+}
+function opHL(o) { document.querySelectorAll('.btn.op').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-op') === o); }); }
+
+/* ── cálculo ── */
+function calc(a, b, o) {
+  var r;
+  if (o==='+') r=a+b; else if (o==='−') r=a-b; else if (o==='×') r=a*b; else if (o==='÷') r=b===0?'Error':a/b; else r=b;
+  return typeof r === 'number' ? Math.round(r * 1e10) / 1e10 : r;
+}
+
+/* ── acciones ── */
+function onDigit(d) {
+  haptic('light');
+  if (S==='A') { if (cur==='0'||cur==='Error') cur=d; else if (cur.length<15) cur+=d; }
+  else if (S==='B') { cur=d; S='C'; }
+  else if (S==='C') { if (cur.length<15) cur+=d; }
+  else { cur=d; n1=0; op=''; S='A'; }
+  render();
+}
+function onDot() {
+  haptic('light');
+  if (S==='B') { cur='0.'; S='C'; render(); return; }
+  if (S==='D') { cur='0.'; n1=0; op=''; S='A'; render(); return; }
+  if (cur.indexOf('.')===-1) { cur+='.'; render(); }
+}
+function onBk() {
+  haptic('light');
+  if (S==='D') return;
+  if (S==='B') { cur=String(n1); op=''; S='A'; render(); return; }
+  cur = cur.length > 1 ? cur.slice(0,-1) : '0'; render();
+}
+function onOp(o) {
+  haptic('light');
+  if (S==='A') { n1=parseFloat(cur); op=o; S='B'; }
+  else if (S==='B') { op=o; opHL(o); }
+  else if (S==='C') {
+    var r = calc(n1, parseFloat(cur), op);
+    if (r==='Error') { cur='Error'; S='A'; haptic('error'); render(); return; }
+    n1=r; cur=String(r); op=o; S='B';
+  } else { n1=parseFloat(cur); op=o; S='B'; }
+  render();
+}
+function onEq() {
+  if (S !== 'C') return;
+  haptic('heavy');
+  var a = n1, b = parseFloat(cur);
+  var r = calc(a, b, op);
+  var exprStr = fmt(a) + ' ' + op + ' ' + fmt(b);
+  var resStr = r === 'Error' ? 'Error' : String(r);
+  hist.unshift({ expr:exprStr, result:resStr, time:new Date(), label:'', tag:'' });
+  if (activePanel==='hist') renderHist();
+  histSave();
+  elPOp.textContent = exprStr;
+  elPRes.textContent = '= ' + fmt(resStr);
+  elPRes.classList.remove('empty','pop'); void elPRes.offsetWidth; elPRes.classList.add('pop');
+  n1=a; cur=resStr; S='D'; render();
+}
+function onAC() { haptic('medium'); cur='0'; n1=0; op=''; S='A'; elExpr.textContent=''; opHL(null); render(); }
+function onSign() { if (S==='D') return; haptic('light'); if (cur==='0'||cur==='Error') return; cur=cur[0]==='-'?cur.slice(1):'-'+cur; render(); }
+function onPct() { if (S==='D') return; haptic('light'); var v=parseFloat(cur); if(isNaN(v)) return; cur=String(v/100); render(); }
+
+/* ── háptico + audio ── */
+var _ac = null;
+function _tick(f, d, v) {
+  try {
+    if (!_ac) _ac = new (window.AudioContext||window.webkitAudioContext)();
+    var o=_ac.createOscillator(), g=_ac.createGain();
+    o.connect(g); g.connect(_ac.destination);
+    o.type='sine'; o.frequency.setValueAtTime(f,_ac.currentTime);
+    g.gain.setValueAtTime(v,_ac.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001,_ac.currentTime+d);
+    o.start(_ac.currentTime); o.stop(_ac.currentTime+d);
+  } catch(e) {}
+}
+function haptic(s) {
+  if (s==='light') { if(navigator.vibrate)navigator.vibrate(6); _tick(520,.025,.04); }
+  else if (s==='medium') { if(navigator.vibrate)navigator.vibrate([10,4,10]); _tick(380,.04,.07); }
+  else if (s==='heavy') { if(navigator.vibrate)navigator.vibrate([18,6,18,6,22]); _tick(220,.07,.12); }
+  else if (s==='error') { if(navigator.vibrate)navigator.vibrate([30,10,30]); _tick(160,.1,.1); }
+}
+document.addEventListener('touchstart', function u() {
+  if (_ac && _ac.state==='suspended') _ac.resume();
+  document.removeEventListener('touchstart', u);
+}, {once:true, passive:true});
+
+/* ── toast ── */
+var _tt = null;
+function showToast(m) {
+  toastEl.textContent = m; toastEl.classList.add('show');
+  clearTimeout(_tt); _tt = setTimeout(function(){ toastEl.classList.remove('show'); }, 2200);
+}
+
+/* ── copy ── */
+function copyResult() {
+  if (navigator.clipboard) navigator.clipboard.writeText(cur).then(function(){ showToast('✓ Copiado'); haptic('medium'); });
+  else { var ta=document.createElement('textarea'); ta.value=cur; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); showToast('✓ Copiado'); haptic('medium'); }
+}
+var _lp = null;
+elNum.addEventListener('pointerdown', function(){ _lp=setTimeout(copyResult,600); });
+elNum.addEventListener('pointerup', function(){ clearTimeout(_lp); });
+elNum.addEventListener('pointerleave', function(){ clearTimeout(_lp); });
+
+/* ── swipe en display ── */
+var _ty=0, _tx2=0;
+document.getElementById('display').addEventListener('touchstart',function(e){ _ty=e.touches[0].clientY; _tx2=e.touches[0].clientX; },{passive:true});
+document.getElementById('display').addEventListener('touchend',function(e){
+  var dy=e.changedTouches[0].clientY-_ty, dx=e.changedTouches[0].clientX-_tx2;
+  if (dy>60&&Math.abs(dx)<60) { haptic('medium'); openPanel('hist'); }
+  if (dx<-80&&Math.abs(dy)<60) { haptic('light'); onBk(); }
+},{passive:true});
+
+/* ── prev toggle ── */
+var prevC = false;
+try { prevC = localStorage.getItem('prevC')==='1'; } catch(e){}
+function applyPrevC() { var z=document.getElementById('prevZone'); if(prevC) z.classList.add('collapsed'); else z.classList.remove('collapsed'); }
+function togglePrev() { prevC=!prevC; applyPrevC(); try{localStorage.setItem('prevC',prevC?'1':'0');}catch(e){} haptic('light'); }
+applyPrevC();
+
+/* ── botones ── */
+var btnsEl = document.getElementById('btns');
+btnsEl.addEventListener('pointerdown', function(e){
+  var b=e.target.closest('.btn'); if(!b) return;
+  b.setPointerCapture(e.pointerId);
+  var rip=document.createElement('span'); rip.className='rip';
+  var rc=b.getBoundingClientRect(), sz=Math.max(rc.width,rc.height);
+  rip.style.cssText='width:'+sz+'px;height:'+sz+'px;left:'+(e.clientX-rc.left-sz/2)+'px;top:'+(e.clientY-rc.top-sz/2)+'px';
+  b.appendChild(rip); setTimeout(function(){ rip.remove(); },550);
+  b.classList.add('pressing');
+});
+btnsEl.addEventListener('pointerup', function(e){ var b=e.target.closest('.btn'); if(!b) return; b.classList.remove('pressing'); b.classList.add('release'); setTimeout(function(){ b.classList.remove('release'); },140); });
+btnsEl.addEventListener('pointercancel', function(e){ var b=e.target.closest('.btn'); if(b){ b.classList.remove('pressing','release'); } });
+btnsEl.addEventListener('click', function(e){
+  var b=e.target.closest('.btn'); if(!b) return;
+  var a=b.getAttribute('data-a');
+  if (a==='d') onDigit(b.getAttribute('data-v'));
+  else if (a==='dt') onDot();
+  else if (a==='bk') onBk();
+  else if (a==='op') onOp(b.getAttribute('data-op'));
+  else if (a==='eq') onEq();
+  else if (a==='ac') onAC();
+  else if (a==='sg') onSign();
+  else if (a==='pc') onPct();
+});
+document.addEventListener('keydown', function(e){
+  if (e.altKey||e.ctrlKey||e.metaKey) return;
+  var k=e.key;
+  if (k>='0'&&k<='9') onDigit(k);
+  else if (k==='.'||k===',') onDot();
+  else if (k==='+') onOp('+');
+  else if (k==='-') onOp('−');
+  else if (k==='*') onOp('×');
+  else if (k==='/') { e.preventDefault(); onOp('÷'); }
+  else if (k==='Enter'||k==='=') onEq();
+  else if (k==='Escape') onAC();
+  else if (k==='Backspace') onBk();
+  else if (k==='c'||k==='C') copyResult();
+});
+
+/* ── menú ── */
+var menuOpen = false;
+function toggleMenu() { menuOpen=!menuOpen; ddMenu.classList.toggle('on',menuOpen); dotsBtn.classList.toggle('on',menuOpen); }
+document.addEventListener('click', function(e){ if(menuOpen&&!document.querySelector('.menu-wrap').contains(e.target)){ menuOpen=false; ddMenu.classList.remove('on'); dotsBtn.classList.remove('on'); } });
+
+/* ── paneles ── */
+var PANELS = { hist:'panHist', cart:'panCart', disc:'panDisc', split:'panSplit', cfg:'panCfg', privacy:'panPrivacy' };
+function openPanel(name) {
+  menuOpen=false; ddMenu.classList.remove('on'); dotsBtn.classList.remove('on');
+  if (activePanel===name) { closeAll(); return; }
+  closeAll();
+  var el=document.getElementById(PANELS[name]); if(!el) return;
+  el.classList.add('on'); elOv.classList.add('on'); activePanel=name;
+  if (name==='hist') renderHist();
+  if (name==='cart') { buildCartCurrencySel(); renderCart(); }
+}
+function closeAll() {
+  Object.values(PANELS).forEach(function(id){ document.getElementById(id).classList.remove('on'); });
+  elOv.classList.remove('on'); activePanel=null;
+}
+
+/* ══════════════════════════════════════════
+   HISTORIAL CON ETIQUETAS
+══════════════════════════════════════════ */
+try { var _sh=localStorage.getItem('histV2'); if(_sh) hist=JSON.parse(_sh); } catch(e){}
+function histSave() { try{ localStorage.setItem('histV2',JSON.stringify(hist.slice(0,200))); }catch(e){} }
+var histFilter = 'all';
+function renderHist() {
+  var tags={};
+  hist.forEach(function(h){ if(h.tag) tags[h.tag]=true; });
+  var tagList = Object.keys(tags);
+  var fEl = document.getElementById('histFilters');
+  fEl.innerHTML = '<div class="hf'+(histFilter==='all'?' sel':'')+'" onclick="setHF(\'all\')">Todos</div>'
+    + tagList.map(function(t){ return '<div class="hf'+(histFilter===t?' sel':'')+'" onclick="setHF(\''+esc(t)+'\')">'+esc(t)+'</div>'; }).join('');
+  var list = histFilter==='all' ? hist : hist.filter(function(h){ return h.tag===histFilter; });
+  var el = document.getElementById('hlist');
+  if (!list.length) { el.innerHTML='<div class="empty-state"><div class="empty-ico">🕐</div><div class="empty-txt">Sin cálculos aún</div></div>'; return; }
+  el.innerHTML = list.map(function(h,i){
+    var ri = hist.indexOf(h);
+    var t = h.time instanceof Date ? h.time : new Date(h.time);
+    var ts = t.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    return '<div class="hi">'
+      +'<div class="hi-main" onclick="useHist('+ri+')">'
+      +(h.tag?'<span class="hi-tag">'+esc(h.tag)+'</span>':'')
+      +'<div class="hi-expr">'+esc(h.expr)+'</div>'
+      +'<div class="hi-res">= '+fmt(h.result)+'</div>'
+      +(h.label?'<div class="hi-label">🏷 '+esc(h.label)+'</div>':'')
+      +'<div class="hi-time">'+ts+'</div>'
+      +'</div>'
+      +'<button class="hi-del" onclick="delHist('+ri+')">✕</button>'
+      +'</div>';
+  }).join('');
+}
+function setHF(t) { histFilter=t; renderHist(); }
+function useHist(i) { cur=hist[i].result; n1=0; op=''; S='A'; elExpr.textContent=hist[i].expr; elPOp.textContent=hist[i].expr; elPRes.textContent='= '+fmt(hist[i].result); elPRes.classList.remove('empty'); render(); closeAll(); }
+function delHist(i) { hist.splice(i,1); histSave(); renderHist(); }
+function clearHist() { hist=[]; histSave(); renderHist(); }
+function showSaveForm() {
+  if (!hist.length) { showToast('Haz un cálculo primero'); return; }
+  document.getElementById('saveForm').classList.add('show');
+  document.getElementById('histFooter').style.display='none';
+  document.getElementById('saveLabel').focus();
+}
+function hideSaveForm() { document.getElementById('saveForm').classList.remove('show'); document.getElementById('histFooter').style.display=''; }
+function doSaveLabel() {
+  var lbl=document.getElementById('saveLabel').value.trim();
+  var tag=document.getElementById('saveTag').value.trim();
+  if (!lbl) { showToast('Escribe un nombre'); return; }
+  if (hist.length) { hist[0].label=lbl; if(tag) hist[0].tag=tag; histSave(); renderHist(); }
+  hideSaveForm(); document.getElementById('saveLabel').value=''; document.getElementById('saveTag').value='';
+  showToast('🏷 '+lbl); haptic('medium');
+}
+
+/* ══════════════════════════════════════════
+   DIVISAS
+══════════════════════════════════════════ */
+var CURRENCIES = {
+  EUR:{name:'Euro',sym:'€',flag:'🇪🇺',rate:1},
+  USD:{name:'Dólar US',sym:'$',flag:'🇺🇸',rate:1.08},
+  GBP:{name:'Libra',sym:'£',flag:'🇬🇧',rate:0.86},
+  MXN:{name:'Peso MX',sym:'$',flag:'🇲🇽',rate:18.5},
+  COP:{name:'Peso CO',sym:'$',flag:'🇨🇴',rate:4200},
+  ARS:{name:'Peso AR',sym:'$',flag:'🇦🇷',rate:950},
+  CLP:{name:'Peso CL',sym:'$',flag:'🇨🇱',rate:1020},
+  PEN:{name:'Sol PE',sym:'S/',flag:'🇵🇪',rate:4.0},
+  BRL:{name:'Real BR',sym:'R$',flag:'🇧🇷',rate:5.4},
+  JPY:{name:'Yen',sym:'¥',flag:'🇯🇵',rate:162},
+  CNY:{name:'Yuan',sym:'¥',flag:'🇨🇳',rate:7.8},
+  CHF:{name:'Franco CH',sym:'Fr',flag:'🇨🇭',rate:0.97},
+  CAD:{name:'Dólar CA',sym:'$',flag:'🇨🇦',rate:1.47},
+  AUD:{name:'Dólar AU',sym:'$',flag:'🇦🇺',rate:1.66},
+  INR:{name:'Rupia',sym:'₹',flag:'🇮🇳',rate:90},
+  TRY:{name:'Lira TR',sym:'₺',flag:'🇹🇷',rate:35},
+  AED:{name:'Dírham',sym:'د.إ',flag:'🇦🇪',rate:3.97},
+  SAR:{name:'Riyal SA',sym:'ر.س',flag:'🇸🇦',rate:4.05},
+  DKK:{name:'Corona DK',sym:'kr',flag:'🇩🇰',rate:7.46},
+  SEK:{name:'Corona SE',sym:'kr',flag:'🇸🇪',rate:11.3},
+  NOK:{name:'Corona NO',sym:'kr',flag:'🇳🇴',rate:11.6},
+  PLN:{name:'Zloty PL',sym:'zł',flag:'🇵🇱',rate:4.25},
+};
+var baseCurrency = 'EUR';
+var cartCurrency = 'EUR';
+try { var _bc=localStorage.getItem('baseCurrency'); if(_bc&&CURRENCIES[_bc]) baseCurrency=_bc; } catch(e){}
+try { var _cc=localStorage.getItem('cartCurrency'); if(_cc&&CURRENCIES[_cc]) cartCurrency=_cc; } catch(e){}
+function fmtWithCurrency(n, code) {
+  var c = CURRENCIES[code]||CURRENCIES['EUR'];
+  return c.sym + ' ' + parseFloat(n).toFixed(2).replace('.',',');
+}
+
+/* ══════════════════════════════════════════
+   LISTA DE COMPRA
+══════════════════════════════════════════ */
+var cartItems = [];
+try { var _sc=localStorage.getItem('cartItems'); if(_sc) cartItems=JSON.parse(_sc); } catch(e){}
+function cartSave() { try{ localStorage.setItem('cartItems',JSON.stringify(cartItems)); }catch(e){} }
+function setCartCurrency(code) {
+  if (!CURRENCIES[code]) return;
+  cartCurrency = code;
+  try{ localStorage.setItem('cartCurrency',code); }catch(e){}
+  renderCart();
+}
+function buildCartCurrencySel() {
+  var sel = document.getElementById('cartCurrencySel');
+  sel.innerHTML = Object.keys(CURRENCIES).map(function(code){
+    var c=CURRENCIES[code];
+    return '<option value="'+code+'"'+(code===cartCurrency?' selected':'')+'>'+c.flag+' '+code+' ('+c.sym+')</option>';
+  }).join('');
+}
+function renderCart() {
+  var total=0,done=0,pend=0;
+  cartItems.forEach(function(it){ var p=parseFloat(it.price)||0; total+=p; if(it.checked) done+=p; else pend+=p; });
+  document.getElementById('cartTotal').textContent = fmtWithCurrency(total,cartCurrency);
+  document.getElementById('cartDone').textContent  = fmtWithCurrency(done,cartCurrency);
+  document.getElementById('cartPend').textContent  = fmtWithCurrency(pend,cartCurrency);
+  var cnt = cartItems.length;
+  document.getElementById('cartCount').textContent = cnt + (cnt===1?' artículo':' artículos');
+  var el = document.getElementById('cartList');
+  if (!cartItems.length) { el.innerHTML='<div class="empty-state"><div class="empty-ico">🛒</div><div class="empty-txt">Lista vacía</div></div>'; return; }
+  el.innerHTML = cartItems.map(function(it,i){
+    return '<div class="ci'+(it.checked?' checked':'')+'" id="ci'+i+'">'
+      +'<button class="ci-check" onclick="cartToggle('+i+')">'
+      +'<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>'
+      +'</button>'
+      +'<div class="ci-info" onclick="cartToggle('+i+')">'
+      +'<div class="ci-name">'+esc(it.name)+'</div>'
+      +'<div class="ci-price" onclick="event.stopPropagation();cartEditOpen('+i+')">'+fmtWithCurrency(it.price,cartCurrency)+'</div>'
+      +'</div>'
+      +'<div class="ci-actions">'
+      +'<button class="ci-edit-btn" onclick="cartEditOpen('+i+')" title="Editar"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>'
+      +'<button class="ci-del" onclick="cartDel('+i+')" title="Eliminar"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></button>'
+      +'</div>'
+      +'</div>'
+      +'<div class="ci-edit-form" id="cef'+i+'">'
+      +'<input class="inp ci-edit-form-name" id="cen'+i+'" value="'+esc(it.name)+'" placeholder="Nombre">'
+      +'<input class="inp inp-price ci-edit-form-price" id="cep'+i+'" type="number" value="'+parseFloat(it.price||0).toFixed(2)+'" placeholder="Precio" inputmode="decimal">'
+      +'<button class="ci-edit-save" onclick="cartEditSave('+i+')">✓</button>'
+      +'</div>';
+  }).join('');
+  // [NUEVO] actualizar presupuesto y contador listas
+  budgetRender();
+  savedListsUpdateCount();
+}
+function cartAdd() {
+  var n=document.getElementById('cartName').value.trim();
+  var p=parseFloat(document.getElementById('cartPrice').value)||0;
+  if (!n) { document.getElementById('cartName').focus(); haptic('error'); return; }
+  cartItems.push({name:n,price:p,checked:false}); cartSave(); haptic('medium');
+  document.getElementById('cartName').value=''; document.getElementById('cartPrice').value='';
+  document.getElementById('cartName').focus();
+  renderCart();
+  // [NUEVO] animación de nuevo item
+  var newEl = document.getElementById('ci'+(cartItems.length-1));
+  if (newEl) { newEl.classList.add('new-item'); }
+  // [NUEVO] verificar alerta de presupuesto
+  budgetCheckAlert();
+}
+function cartUseCalc() {
+  var v=parseFloat(cur.replace(',','.'));
+  if (isNaN(v)||v<0) { haptic('error'); showToast('Calcula un precio primero'); return; }
+  document.getElementById('cartPrice').value=v.toFixed(2);
+  document.getElementById('cartName').focus();
+  showToast('Precio listo: '+fmtWithCurrency(v,cartCurrency)); haptic('light');
+}
+function cartToggle(i) { cartItems[i].checked=!cartItems[i].checked; haptic('light'); cartSave(); renderCart(); }
+function cartEditOpen(i) {
+  haptic('light');
+  // cerrar todos primero
+  document.querySelectorAll('.ci-edit-form').forEach(function(f){ f.classList.remove('open'); });
+  var form = document.getElementById('cef'+i);
+  if (form) { form.classList.add('open'); document.getElementById('cen'+i).focus(); }
+}
+function cartEditSave(i) {
+  var name = (document.getElementById('cen'+i).value||'').trim();
+  var price = parseFloat(document.getElementById('cep'+i).value)||0;
+  if (!name) { haptic('error'); return; }
+  cartItems[i].name = name;
+  cartItems[i].price = price;
+  haptic('medium');
+  cartSave();
+  renderCart();
+  showToast('✓ Actualizado');
+  budgetRender(); // [NUEVO]
+}
+function cartDel(i) {
+  cartItems.splice(i,1); haptic('light'); cartSave(); renderCart();
+  budgetRender(); // [NUEVO]
+}
+function cartUncheck() { cartItems.forEach(function(it){ it.checked=false; }); haptic('medium'); cartSave(); renderCart(); }
+function cartClear() { if(!cartItems.length) return; cartItems=[]; haptic('medium'); cartSave(); renderCart(); }
+document.getElementById('cartName').addEventListener('keydown',function(e){ if(e.key==='Enter') document.getElementById('cartPrice').focus(); });
+document.getElementById('cartPrice').addEventListener('keydown',function(e){ if(e.key==='Enter') cartAdd(); });
+// close edit form on outside tap
+document.addEventListener('click', function(e){
+  if (!e.target.closest('.ci-edit-form') && !e.target.closest('.ci-edit-btn') && !e.target.closest('.ci-price')) {
+    document.querySelectorAll('.ci-edit-form').forEach(function(f){ f.classList.remove('open'); });
+  }
+});
+
+/* ══════════════════════════════════════════
+   DESCUENTOS
+══════════════════════════════════════════ */
+function calcDisc() {
+  var price=parseFloat(document.getElementById('discPrice').value)||0;
+  var pct=Math.max(0,Math.min(100,parseFloat(document.getElementById('discPct').value)||0));
+  var sym = (CURRENCIES[baseCurrency]||CURRENCIES['EUR']).sym;
+  if (!price) {
+    document.getElementById('discFinal').textContent='—';
+    document.getElementById('discSaving').textContent='';
+    document.getElementById('discBar').style.width='100%';
+    document.getElementById('discCompare').style.display='none';
+    return;
+  }
+  var save=r2(price*pct/100), final=r2(price-save);
+  var fmt2=function(n){ return sym+' '+n.toFixed(2).replace('.',','); };
+  document.getElementById('discFinal').textContent=fmt2(final);
+  document.getElementById('discSaving').innerHTML='Ahorras <span>'+fmt2(save)+'</span>';
+  document.getElementById('discBar').style.width=(100-pct)+'%';
+  document.getElementById('discBar').style.background=pct>40?'var(--acc)':'var(--acc2)';
+  document.getElementById('discBarL').textContent=pct+'% descuento';
+  document.getElementById('discBarR').textContent=fmt2(price);
+  document.getElementById('discCompare').style.display='block';
+  document.getElementById('dcOrig').textContent=fmt2(price);
+  document.getElementById('dcDisc').textContent='−'+pct+'%';
+  document.getElementById('dcFinal').textContent=fmt2(final);
+  document.getElementById('dcSave').textContent=fmt2(save);
+}
+function discToCalc() {
+  var price=parseFloat(document.getElementById('discPrice').value)||0;
+  var pct=parseFloat(document.getElementById('discPct').value)||0;
+  if (!price) { haptic('error'); showToast('Introduce un precio'); return; }
+  var final=r2(price-price*pct/100);
+  cur=String(final); S='A'; n1=0; op=''; render(); closeAll(); showToast('Resultado enviado ✓');
+}
+function discClear() { document.getElementById('discPrice').value=''; document.getElementById('discPct').value=''; calcDisc(); }
+
+/* ══════════════════════════════════════════
+   SPLIT DE GASTOS
+══════════════════════════════════════════ */
+var splitN = 2;
+document.getElementById('splitN').textContent = splitN;
+function splitAdj(d) { splitN=Math.max(2,Math.min(50,splitN+d)); document.getElementById('splitN').textContent=splitN; haptic('light'); calcSplit(); }
+function calcSplit() {
+  var total=parseFloat(document.getElementById('splitTotal').value)||0;
+  var tip=Math.max(0,parseFloat(document.getElementById('splitTip').value)||0);
+  var sym=(CURRENCIES[baseCurrency]||CURRENCIES['EUR']).sym;
+  var fmt2=function(n){ return sym+' '+n.toFixed(2).replace('.',','); };
+  if (!total) { document.getElementById('splitPP').textContent='—'; document.getElementById('splitSub').textContent=''; document.getElementById('splitBreak').style.display='none'; return; }
+  var tipAmt=r2(total*tip/100), grand=r2(total+tipAmt), pp=r2(grand/splitN);
+  document.getElementById('splitPP').textContent=fmt2(pp);
+  document.getElementById('splitSub').textContent=splitN+' personas · '+tip+'% propina';
+  document.getElementById('splitBreak').style.display='block';
+  document.getElementById('spBase').textContent=fmt2(total);
+  document.getElementById('spTipPct').textContent=tip;
+  document.getElementById('spTip').textContent=fmt2(tipAmt);
+  document.getElementById('spTotal').textContent=fmt2(grand);
+  document.getElementById('spN').textContent=splitN;
+}
+function splitToCalc() {
+  var total=parseFloat(document.getElementById('splitTotal').value)||0;
+  if (!total) { haptic('error'); showToast('Introduce el total'); return; }
+  var tip=parseFloat(document.getElementById('splitTip').value)||0;
+  var pp=r2(total*(1+tip/100)/splitN);
+  cur=String(pp); S='A'; n1=0; op=''; render(); closeAll(); showToast('Resultado enviado ✓');
+}
+function splitClear() { document.getElementById('splitTotal').value=''; document.getElementById('splitTip').value=''; calcSplit(); }
+
+/* ══════════════════════════════════════════
+   TEMAS
+══════════════════════════════════════════ */
+var THEMES_DARK = [
+  {id:'',      name:'Negro',  c:['#000','#c8f135','#111','#7b61ff']},
+  {id:'amoled',name:'AMOLED', c:['#000','#30d158','#0d0d0d','#0a84ff']},
+  {id:'ocean', name:'Océano', c:['#000d1a','#00d4ff','#071a2e','#0055ff']},
+  {id:'rose',  name:'Rosa',   c:['#09000c','#ff375f','#190016','#bf5af2']},
+  {id:'amber', name:'Ámbar',  c:['#090500','#ffd60a','#1a1200','#ff9f0a']},
+  {id:'mint',  name:'Menta',  c:['#000d06','#00ff95','#002010','#00c77a']},
+  {id:'dusk',  name:'Dusk',   c:['#0d0a14','#e879f9','#1c1628','#f59e0b']},
+  {id:'steel', name:'Steel',  c:['#080a10','#64ffda','#141820','#448aff']},
+];
+var THEMES_LIGHT = [
+  {id:'light', name:'Blanco', c:['#f2f2f7','#5e5ce6','#fff','#007aff']},
+  {id:'cream', name:'Crema',  c:['#faf6f0','#c0392b','#fff','#e67e22']},
+  {id:'sky',   name:'Cielo',  c:['#e8f4ff','#0066cc','#fff','#00aaff']},
+  {id:'forest',name:'Bosque', c:['#f0f5f0','#2d6a2d','#fff','#4caf50']},
+];
+var selTheme = '';
+try { var _st=localStorage.getItem('calcTheme'); if(_st!==null) selTheme=_st; } catch(e){}
+if (selTheme) document.body.setAttribute('data-theme', selTheme);
+
+function buildTheme(list, gridId) {
+  document.getElementById(gridId).innerHTML = list.map(function(t){
+    return '<div class="tc'+(t.id===selTheme?' sel':'')+'" onclick="setTheme(\''+t.id+'\',this)">'
+      +'<div class="tc-preview">'
+      +'<span style="background:'+t.c[0]+'"></span><span style="background:'+t.c[1]+'"></span>'
+      +'<span style="background:'+t.c[2]+'"></span><span style="background:'+t.c[3]+'"></span>'
+      +'</div><div class="tc-name">'+t.name+'</div></div>';
+  }).join('');
+}
+function buildThemes() { buildTheme(THEMES_DARK,'themeGridDark'); buildTheme(THEMES_LIGHT,'themeGridLight'); }
+function setTheme(id, card) {
+  selTheme=id; document.body.setAttribute('data-theme',id);
+  document.querySelectorAll('.tc').forEach(function(c){ c.classList.remove('sel'); });
+  if (card) card.classList.add('sel');
+  try{ localStorage.setItem('calcTheme',id); }catch(e){}
+}
+
+/* ── moneda base ── */
+function buildCurrencySels() {
+  var opts = Object.keys(CURRENCIES).map(function(code){
+    var c=CURRENCIES[code];
+    return '<option value="'+code+'"'+(code===baseCurrency?' selected':'')+'>'+c.flag+' '+code+' – '+c.name+'</option>';
+  }).join('');
+  document.getElementById('baseCurrencySel').innerHTML = opts;
+}
+function setBaseCurrency(code) {
+  if (!CURRENCIES[code]) return;
+  baseCurrency=code; try{ localStorage.setItem('baseCurrency',code); }catch(e){}
+  showToast('Moneda: '+code);
+}
+
+/* ── PWA ── */
+var deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', function(e){
+  e.preventDefault(); deferredPrompt=e;
+  document.getElementById('installBar').classList.add('show');
+});
+function doInstall() { if(!deferredPrompt) return; deferredPrompt.prompt(); deferredPrompt.userChoice.then(function(){ deferredPrompt=null; hideInstall(); }); }
+function hideInstall() { document.getElementById('installBar').classList.remove('show'); }
+window.addEventListener('appinstalled', function(){ hideInstall(); showToast('✓ App instalada'); });
+
+/* ── Service Worker externo ── */
+/* Solo se registra cuando la app está en un servidor real (no en preview) */
+if ('serviceWorker' in navigator) {
+  var swScope = window.location.protocol;
+  var isLocal = window.location.hostname === 'localhost' || 
+                window.location.hostname === '127.0.0.1' ||
+                window.location.protocol === 'file:';
+  var isPreview = window.location.hostname.indexOf('claudeusercontent') !== -1 ||
+                  window.location.hostname.indexOf('claude.ai') !== -1;
+  
+  if (!isPreview) {
+    navigator.serviceWorker.register('./sw.js')
+      .then(function(reg) {
+        reg.addEventListener('updatefound', function() {
+          var nw = reg.installing;
+          nw.addEventListener('statechange', function() {
+            if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+              showToast('App actualizada ✓');
+            }
+          });
+        });
+      })
+      .catch(function() { /* silencioso en entornos sin soporte */ });
+  }
+}
+
+/* ══════════════════════════════════════════
+   SPLASH — solo al instalar (primera vez)
+══════════════════════════════════════════ */
+function showSplash(cb) {
+  var sp = document.getElementById('splash');
+  sp.style.display = 'flex';
+  setTimeout(function() {
+    sp.classList.add('hide');
+    setTimeout(function() {
+      sp.style.display = 'none';
+      if (cb) cb();
+    }, 520);
+  }, 2200);
+}
+
+/* ══════════════════════════════════════════
+   TUTORIAL
+══════════════════════════════════════════ */
+var tutIdx = 0;
+var TUT_TOTAL = document.querySelectorAll('.tut-slide').length;
+
+function buildTutDots() {
+  var d = document.getElementById('tutDots'); d.innerHTML = '';
+  for (var i = 0; i < TUT_TOTAL; i++) {
+    var s = document.createElement('div');
+    s.className = 'tut-dot' + (i===0?' active':'');
+    d.appendChild(s);
+  }
+}
+function tutStep() {
+  tutIdx++;
+  if (tutIdx >= TUT_TOTAL) { closeTutorial(); return; }
+  document.getElementById('tutTrack').style.transform = 'translateX(-'+(tutIdx*100)+'%)';
+  document.querySelectorAll('.tut-dot').forEach(function(d,i){ d.classList.toggle('active',i===tutIdx); });
+  var isLast = tutIdx === TUT_TOTAL - 1;
+  var btn = document.getElementById('tutNext');
+  btn.textContent = isLast ? '¡Empezar!' : 'Siguiente';
+  if (isLast) btn.style.background = 'var(--acc)';
+}
+function closeTutorial() {
+  var t = document.getElementById('tutorial');
+  t.classList.add('hide');
+  setTimeout(function(){ t.style.display='none'; }, 380);
+  try{ localStorage.setItem('tutDone','1'); }catch(e){}
+}
+function openTutorial() {
+  tutIdx = 0;
+  document.getElementById('tutTrack').style.transform = 'translateX(0)';
+  document.querySelectorAll('.tut-dot').forEach(function(d,i){ d.classList.toggle('active',i===0); });
+  document.getElementById('tutNext').textContent = 'Siguiente';
+  document.getElementById('tutNext').style.background = '';
+  var t = document.getElementById('tutorial');
+  t.style.display = 'flex';
+  setTimeout(function(){ t.classList.remove('hide'); }, 10);
+}
+// swipe en tutorial
+var _tutTy = 0;
+document.getElementById('tutorial').addEventListener('touchstart', function(e){ _tutTy = e.touches[0].clientX; },{passive:true});
+document.getElementById('tutorial').addEventListener('touchend', function(e){
+  var dx = e.changedTouches[0].clientX - _tutTy;
+  if (dx < -50) tutStep();
+  if (dx > 50 && tutIdx > 0) {
+    tutIdx -= 2; tutStep();
+  }
+},{passive:true});
+
+
+/* ════════════════════════════════════════════
+   [NUEVO] MÓDULO: PRESUPUESTO DINÁMICO
+   - budgetUpdate(), budgetRender(), budgetCheckAlert()
+   - No toca ninguna función existente
+════════════════════════════════════════════ */
+var budget = {
+  amount: 0,
+  alertShown: false,
+  alertTimer: null
+};
+// Cargar presupuesto guardado
+try {
+  var _sb = localStorage.getItem('cartBudget');
+  if (_sb) {
+    budget.amount = parseFloat(_sb) || 0;
+    // Restaurar en el input cuando se abra el panel
+    document.addEventListener('DOMContentLoaded', function() {
+      var bi = document.getElementById('budgetInput');
+      if (bi && budget.amount > 0) bi.value = budget.amount.toFixed(2);
+    });
+  }
+} catch(e) {}
+
+/** Llamada cuando el usuario cambia el presupuesto */
+function budgetUpdate() {
+  var v = parseFloat(document.getElementById('budgetInput').value) || 0;
+  budget.amount = v;
+  budget.alertShown = false;
+  try { localStorage.setItem('cartBudget', v); } catch(e) {}
+  budgetRender();
+}
+
+/** Actualiza la barra visual y el texto de presupuesto restante */
+function budgetRender() {
+  var wrap = document.getElementById('budgetWrap');
+  var fill = document.getElementById('budgetFill');
+  var rem  = document.getElementById('budgetRemaining');
+  if (!wrap || !fill || !rem) return;
+
+  // Calcular total actual
+  var total = cartItems.reduce(function(s,it){ return s + (parseFloat(it.price)||0); }, 0);
+  var b = budget.amount;
+
+  if (b <= 0) {
+    wrap.style.display = 'none';
+    return;
+  }
+  wrap.style.display = 'block';
+
+  var remaining = b - total;
+  var pct = Math.min(100, (total / b) * 100);
+
+  // Texto restante
+  rem.textContent = fmtWithCurrency(Math.abs(remaining), cartCurrency)
+    + (remaining < 0 ? ' excedido' : ' restante');
+
+  // Colores según estado
+  var state = pct >= 100 ? 'over' : pct >= 80 ? 'warn' : '';
+  rem.className   = 'budget-remaining' + (state ? ' '+state : '');
+  fill.className  = 'budget-fill'      + (state ? ' '+state : '');
+  fill.style.width = pct + '%';
+}
+
+/** Muestra alertas en el tope de la pantalla */
+function budgetCheckAlert() {
+  if (budget.amount <= 0) return;
+  var total = cartItems.reduce(function(s,it){ return s + (parseFloat(it.price)||0); }, 0);
+  var pct   = (total / budget.amount) * 100;
+  var alertEl = document.getElementById('budgetAlert');
+  if (!alertEl) return;
+
+  function _showAlert(msg, isOver) {
+    alertEl.textContent = (isOver ? '🚨 ' : '⚠️ ') + msg;
+    alertEl.className = 'budget-alert' + (isOver ? ' over' : '') + ' show';
+    clearTimeout(budget.alertTimer);
+    budget.alertTimer = setTimeout(function() {
+      alertEl.classList.remove('show');
+    }, 3500);
+    haptic(isOver ? 'heavy' : 'medium');
+  }
+
+  if (pct >= 100 && !budget.alertShown) {
+    budget.alertShown = true;
+    _showAlert('¡Presupuesto superado!', true);
+  } else if (pct >= 80 && pct < 100 && !budget.alertShown) {
+    budget.alertShown = true;
+    _showAlert('Cerca del límite (' + Math.round(pct) + '%)', false);
+  }
+}
+
+// Restaurar valor del input al abrir panel cart
+var _origOpenPanel = openPanel;
+openPanel = function(name) {
+  _origOpenPanel(name);
+  if (name === 'cart') {
+    var bi = document.getElementById('budgetInput');
+    if (bi && budget.amount > 0 && !bi.value) bi.value = budget.amount.toFixed(2);
+    budgetRender();
+    renderSavedLists();
+  }
+};
+
+/* ════════════════════════════════════════════
+   [NUEVO] MÓDULO: HISTORIAL DE LISTAS
+   - cartSaveList(), loadSavedList(), deleteSavedList()
+   - renderSavedLists(), toggleSavedLists()
+════════════════════════════════════════════ */
+var savedLists = [];
+try {
+  var _ssl = localStorage.getItem('savedCartLists');
+  if (_ssl) savedLists = JSON.parse(_ssl);
+} catch(e) {}
+
+function savedListsPersist() {
+  try { localStorage.setItem('savedCartLists', JSON.stringify(savedLists.slice(0, 20))); } catch(e) {}
+}
+
+/** Guarda la lista actual con nombre y fecha */
+function cartSaveList() {
+  if (!cartItems.length) { showToast('La lista está vacía'); haptic('error'); return; }
+  var name = prompt('Nombre para esta lista:', 'Lista ' + new Date().toLocaleDateString('es-ES'));
+  if (!name) return;
+  var snap = {
+    id: Date.now(),
+    name: name.trim() || 'Lista sin nombre',
+    date: new Date().toISOString(),
+    items: JSON.parse(JSON.stringify(cartItems)), // copia profunda
+    total: cartItems.reduce(function(s,it){ return s+(parseFloat(it.price)||0); }, 0),
+    currency: cartCurrency
+  };
+  savedLists.unshift(snap);
+  savedListsPersist();
+  savedListsUpdateCount();
+  renderSavedLists();
+  showToast('✅ Lista guardada: ' + snap.name);
+  haptic('heavy');
+}
+
+/** Carga una lista guardada (reemplaza la actual) */
+function loadSavedList(id) {
+  var found = savedLists.find(function(l){ return l.id === id; });
+  if (!found) return;
+  if (cartItems.length && !confirm('¿Reemplazar la lista actual con "' + found.name + '"?')) return;
+  cartItems = JSON.parse(JSON.stringify(found.items));
+  cartSave();
+  renderCart();
+  toggleSavedLists(); // cerrar el acordeón
+  showToast('📋 Lista cargada: ' + found.name);
+  haptic('medium');
+}
+
+/** Elimina una lista del historial */
+function deleteSavedList(id) {
+  savedLists = savedLists.filter(function(l){ return l.id !== id; });
+  savedListsPersist();
+  savedListsUpdateCount();
+  renderSavedLists();
+  haptic('light');
+}
+
+/** Renderiza el acordeón de listas guardadas */
+function renderSavedLists() {
+  var body = document.getElementById('savedListsBody');
+  if (!body) return;
+  if (!savedLists.length) {
+    body.innerHTML = '<div class="sl-empty">Sin listas guardadas aún</div>';
+    return;
+  }
+  body.innerHTML = savedLists.map(function(l) {
+    var d = new Date(l.date);
+    var ds = d.toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'});
+    var sym = (CURRENCIES[l.currency||'EUR']||CURRENCIES['EUR']).sym;
+    var totalStr = sym + ' ' + parseFloat(l.total||0).toFixed(2).replace('.',',');
+    return '<div class="sl-item">'
+      + '<div class="sl-info" onclick="loadSavedList('+l.id+')">'
+      + '<div class="sl-name">'+esc(l.name)+'</div>'
+      + '<div class="sl-meta">'+ds+' · '+l.items.length+' artículos · '+totalStr+'</div>'
+      + '</div>'
+      + '<div class="sl-actions">'
+      + '<button class="sl-load-btn" onclick="loadSavedList('+l.id+')">Cargar</button>'
+      + '<button class="sl-del-btn" onclick="deleteSavedList('+l.id+')">✕</button>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+/** Muestra/oculta el acordeón de listas */
+var _slOpen = false;
+function toggleSavedLists() {
+  _slOpen = !_slOpen;
+  var body    = document.getElementById('savedListsBody');
+  var toggle  = document.getElementById('savedListsToggle');
+  if (body)   body.classList.toggle('open', _slOpen);
+  if (toggle) toggle.classList.toggle('open', _slOpen);
+  if (_slOpen) renderSavedLists();
+  haptic('light');
+}
+
+/** Actualiza el contador del badge */
+function savedListsUpdateCount() {
+  var el = document.getElementById('savedListsCount');
+  if (el) el.textContent = savedLists.length;
+}
+
+/* ════════════════════════════════════════════
+   [NUEVO] MÓDULO: MODO PRO (base preparada)
+   - showProInfo(), openPrivacy()
+   - Estructura lista para integrar pagos
+════════════════════════════════════════════ */
+var PRO_CONFIG = {
+  enabled: false,                  // ← cambiar a true al activar
+  price: '1,99 €',
+  features: ['Sin publicidad','Exportar listas','Backup en la nube','Temas exclusivos']
+};
+
+/** Muestra información del modo Pro */
+function showProInfo() {
+  var msg = '✨ Calc+ Pro\n\n'
+    + PRO_CONFIG.features.map(function(f){ return '• '+f; }).join('\n')
+    + '\n\nPrecio: ' + PRO_CONFIG.price + ' /mes\n'
+    + '(Próximamente disponible)';
+  alert(msg);
+  haptic('medium');
+}
+
+/** Abre la política de privacidad */
+function openPrivacy() {
+  openPanel('privacy');
+  haptic('light');
+}
+
+/* ════════════════════════════════════════════
+   [NUEVO] MÓDULO: TOTAL SIEMPRE VISIBLE
+   - Mini badge en el topbar mostrando total del carro
+════════════════════════════════════════════ */
+function _updateCartBadge() {
+  // Solo mostrar si hay items
+  var badge = document.getElementById('cartBadge');
+  if (!badge) return;
+  var total = cartItems.reduce(function(s,it){ return s+(parseFloat(it.price)||0); }, 0);
+  var pill = document.getElementById('cartPillBtn');
+  if (cartItems.length) {
+    var sym = (CURRENCIES[cartCurrency]||CURRENCIES['EUR']).sym;
+    badge.textContent = sym + ' ' + total.toFixed(2).replace('.',',');
+    badge.style.display = 'inline';
+    if (pill) pill.style.display = '';
+  } else {
+    badge.style.display = 'none';
+    if (pill) pill.style.display = 'none';
+  }
+}
+// Llamar tras cada render de cart (parchear renderCart)
+var __rcOrig = renderCart;
+renderCart = function() {
+  __rcOrig();
+  _updateCartBadge();
+};
+
+/* ── INIT ── */
+buildThemes();
+buildCurrencySels();
+buildCartCurrencySel();
+buildTutDots();
+render();
+// [NUEVO] inicializar badge cart y contador listas
+_updateCartBadge();
+savedListsUpdateCount();
+budgetRender();
+
+// Splash + Tutorial: solo la primera vez
+(function() {
+  try {
+    var done = localStorage.getItem('tutDone');
+    var splashSeen = localStorage.getItem('splashSeen');
+    if (done === '1') {
+      // Ya usó la app — ni splash ni tutorial
+      document.getElementById('tutorial').style.display = 'none';
+    } else if (!splashSeen) {
+      // Primera vez: splash → tutorial
+      localStorage.setItem('splashSeen','1');
+      showSplash(function() { openTutorial(); });
+    } else {
+      // Splash ya visto pero tutorial no completado
+      openTutorial();
+    }
+  } catch(e) {
+    document.getElementById('tutorial').style.display = 'none';
+  }
+})();
+</script>
+</body>
+</html>
