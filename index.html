@@ -801,27 +801,6 @@ body{
 }
 .ci.new-item{animation:itemPop .3s cubic-bezier(.34,1.56,.64,1)}
 
-/* ══════════════════════════════════════════
-   [NUEVO] MODO PRO BADGE (base)
-══════════════════════════════════════════ */
-.pro-badge{
-  display:inline-flex;align-items:center;gap:4px;
-  background:linear-gradient(135deg,#ffd60a,#ff9f0a);
-  color:#000;padding:2px 8px;border-radius:20px;
-  font-size:9px;font-weight:800;letter-spacing:.08em;
-  margin-left:6px;vertical-align:middle;
-}
-.pro-row{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:13px 0;border-bottom:1px solid var(--bd);
-}
-.pro-cta{
-  background:linear-gradient(135deg,#ffd60a,#ff9f0a);color:#000;
-  border:none;padding:8px 16px;border-radius:10px;font-size:12px;
-  font-weight:700;cursor:pointer;transition:filter .15s;
-  -webkit-tap-highlight-color:transparent;
-}
-.pro-cta:hover{filter:brightness(1.1)}
 </style>
 </head>
 <body>
@@ -1088,9 +1067,11 @@ body{
     </div>
     <div class="saved-lists-body" id="savedListsBody"></div>
   </div>
-  <div class="cart-footer">
+  <div class="cart-footer" style="flex-wrap:wrap">
     <button class="btn-secondary" onclick="cartUncheck()">Desmarcar todo</button>
     <button class="btn-secondary" onclick="cartSaveList()">💾 Guardar lista</button>
+    <button class="btn-secondary" onclick="shareCartList()">📤 Compartir</button>
+    <button class="btn-secondary" onclick="copyCartList()">📋 Copiar</button>
     <button class="btn-danger" onclick="cartClear()">Vaciar</button>
   </div>
 </div>
@@ -1172,20 +1153,19 @@ body{
     <span class="sec-lbl">Moneda base</span>
     <select class="currency-sel" id="baseCurrencySel" onchange="setBaseCurrency(this.value)"></select>
     <div class="divider"></div>
-    <div class="s-row"><div><div class="s-row-label">Versión</div><div class="s-row-sub">1.0 · Funciona sin internet</div></div></div>
+    <span class="sec-lbl">Tipos de cambio</span>
+    <div class="s-row"><div><div class="s-row-label">Actualizar con internet</div><div class="s-row-sub" id="fxStatus">Tipos de referencia (sin actualizar)</div></div><button class="btn-secondary" style="font-size:11px" onclick="fxUpdate(false)">Actualizar</button></div>
+    <div class="divider"></div>
+    <span class="sec-lbl">Respaldo de datos</span>
+    <div class="s-row"><div><div class="s-row-label">Exportar respaldo</div><div class="s-row-sub">Historial, listas, presupuesto y ajustes</div></div><button class="btn-secondary" style="font-size:11px" onclick="backupExport()">Exportar</button></div>
+    <div class="s-row"><div><div class="s-row-label">Importar respaldo</div><div class="s-row-sub">Restaura un respaldo exportado antes</div></div><button class="btn-secondary" style="font-size:11px" onclick="document.getElementById('backupFile').click()">Importar</button></div>
+    <input type="file" id="backupFile" accept=".json,application/json" style="display:none" onchange="backupImport(this)">
+    <div class="divider"></div>
+    <div class="s-row"><div><div class="s-row-label">Versión</div><div class="s-row-sub">1.1 · Funciona sin internet · Divisas actualizables</div></div></div>
     <div class="s-row"><div><div class="s-row-label">Mantén el resultado</div><div class="s-row-sub">Copia el número al portapapeles</div></div></div>
     <div class="s-row"><button class="btn-secondary" style="width:100%;margin-top:4px" onclick="openTutorial();closeAll()">Ver tutorial de nuevo</button></div>
     <div class="divider"></div>
-    <!-- [NUEVO] Modo Pro (base preparada) -->
-    <span class="sec-lbl">Versión <span class="pro-badge">PRO</span></span>
-    <div class="pro-row">
-      <div>
-        <div class="s-row-label">Calc+ Pro</div>
-        <div class="s-row-sub">Sin límites · Sin publicidad</div>
-      </div>
-      <button class="pro-cta" onclick="showProInfo()">Ver más</button>
-    </div>
-    <div class="pro-row" style="border:none">
+    <div class="s-row">
       <div>
         <div class="s-row-label">Política de privacidad</div>
         <div class="s-row-sub">Tus datos nunca salen del dispositivo</div>
@@ -1506,6 +1486,66 @@ var baseCurrency = 'EUR';
 var cartCurrency = 'EUR';
 try { var _bc=localStorage.getItem('baseCurrency'); if(_bc&&CURRENCIES[_bc]) baseCurrency=_bc; } catch(e){}
 try { var _cc=localStorage.getItem('cartCurrency'); if(_cc&&CURRENCIES[_cc]) cartCurrency=_cc; } catch(e){}
+
+/* ══════════════════════════════════════════
+   TIPOS DE CAMBIO (actualizables con internet)
+   API gratuita sin clave: open.er-api.com
+   Sin internet se usan los últimos guardados
+   o los tipos de referencia de la tabla.
+══════════════════════════════════════════ */
+var FX_API = 'https://open.er-api.com/v6/latest/EUR';
+var fxUpdated = null;
+try {
+  var _fx = localStorage.getItem('fxRates');
+  if (_fx) {
+    var _fxObj = JSON.parse(_fx);
+    Object.keys(_fxObj).forEach(function(code){
+      if (CURRENCIES[code] && isFinite(_fxObj[code]) && _fxObj[code] > 0) CURRENCIES[code].rate = _fxObj[code];
+    });
+    fxUpdated = localStorage.getItem('fxUpdated') || null;
+  }
+} catch(e){}
+/** Convierte un monto entre dos monedas (base EUR) */
+function convert(amount, from, to) {
+  var rf = (CURRENCIES[from]||CURRENCIES['EUR']).rate;
+  var rt = (CURRENCIES[to]||CURRENCIES['EUR']).rate;
+  if (!rf || !rt) return amount;
+  return amount / rf * rt;
+}
+function fxRenderStatus() {
+  var el = document.getElementById('fxStatus');
+  if (!el) return;
+  if (fxUpdated) {
+    var d = new Date(fxUpdated);
+    el.textContent = 'Actualizado: ' + d.toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'}) + ' ' + d.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
+  } else {
+    el.textContent = 'Tipos de referencia (sin actualizar)';
+  }
+}
+/** Descarga los tipos actuales. quiet=true no muestra avisos (auto). */
+function fxUpdate(quiet) {
+  if (!navigator.onLine) { if (!quiet) { showToast('Sin internet: usando últimos tipos'); haptic('error'); } return; }
+  var done = false;
+  var to = setTimeout(function(){ if (!done) { done = true; if (!quiet) { showToast('Tardó demasiado, intenta luego'); haptic('error'); } } }, 10000);
+  fetch(FX_API).then(function(res){ if (!res.ok) throw 0; return res.json(); }).then(function(data){
+    if (done) return; done = true; clearTimeout(to);
+    if (!data || data.result !== 'success' || !data.rates) throw 0;
+    var saved = {};
+    Object.keys(CURRENCIES).forEach(function(code){
+      if (isFinite(data.rates[code]) && data.rates[code] > 0) { CURRENCIES[code].rate = data.rates[code]; saved[code] = data.rates[code]; }
+    });
+    try {
+      localStorage.setItem('fxRates', JSON.stringify(saved));
+      fxUpdated = new Date().toISOString();
+      localStorage.setItem('fxUpdated', fxUpdated);
+    } catch(e){}
+    fxRenderStatus();
+    if (!quiet) { showToast('✅ Tipos de cambio actualizados'); haptic('medium'); }
+  }).catch(function(){
+    if (done) return; done = true; clearTimeout(to);
+    if (!quiet) { showToast('No se pudo actualizar'); haptic('error'); }
+  });
+}
 function fmtWithCurrency(n, code) {
   var c = CURRENCIES[code]||CURRENCIES['EUR'];
   return c.sym + ' ' + parseFloat(n).toFixed(2).replace('.',',');
@@ -1519,6 +1559,12 @@ try { var _sc=localStorage.getItem('cartItems'); if(_sc) cartItems=JSON.parse(_s
 function cartSave() { try{ localStorage.setItem('cartItems',JSON.stringify(cartItems)); }catch(e){} }
 function setCartCurrency(code) {
   if (!CURRENCIES[code]) return;
+  if (code !== cartCurrency) {
+    // Convertir los precios guardados a la nueva moneda
+    var old = cartCurrency;
+    cartItems.forEach(function(it){ it.price = r2(convert(parseFloat(it.price)||0, old, code)); });
+    cartSave();
+  }
   cartCurrency = code;
   try{ localStorage.setItem('cartCurrency',code); }catch(e){}
   renderCart();
@@ -2005,6 +2051,50 @@ function deleteSavedList(id) {
   haptic('light');
 }
 
+/* ══════════════════════════════════════════
+   COMPARTIR LISTA (WhatsApp o lo que elijas)
+══════════════════════════════════════════ */
+function cartListText() {
+  var sym = (CURRENCIES[cartCurrency]||CURRENCIES['EUR']).sym;
+  var lines = ['🛒 Mi lista Calc+', ''];
+  cartItems.forEach(function(it){
+    lines.push((it.checked ? '☑ ' : '☐ ') + it.name + ' — ' + sym + ' ' + (parseFloat(it.price)||0).toFixed(2).replace('.', ','));
+  });
+  var total = cartItems.reduce(function(s,it){ return s + (parseFloat(it.price)||0); }, 0);
+  lines.push('');
+  lines.push('Total: ' + sym + ' ' + total.toFixed(2).replace('.', ','));
+  var b = parseFloat(localStorage.getItem('cartBudget')) || 0;
+  if (b > 0) lines.push('Presupuesto: ' + sym + ' ' + b.toFixed(2).replace('.', ','));
+  return lines.join('\n');
+}
+/** Comparte la lista: hoja nativa (elige WhatsApp, etc.) o WhatsApp directo */
+function shareCartList() {
+  if (!cartItems.length) { showToast('La lista está vacía'); haptic('error'); return; }
+  var text = cartListText();
+  haptic('medium');
+  if (navigator.share) {
+    navigator.share({ title: 'Mi lista Calc+', text: text }).catch(function(){});
+  } else {
+    window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+  }
+}
+/** Copia la lista al portapapeles */
+function copyCartList() {
+  if (!cartItems.length) { showToast('La lista está vacía'); haptic('error'); return; }
+  var text = cartListText();
+  function done(){ showToast('📋 Lista copiada'); haptic('medium'); }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done, function(){ copyCartListFallback(text); done(); });
+  } else { copyCartListFallback(text); done(); }
+}
+function copyCartListFallback(text) {
+  var ta = document.createElement('textarea');
+  ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); } catch(e){}
+  document.body.removeChild(ta);
+}
+
 /** Renderiza el acordeón de listas guardadas */
 function renderSavedLists() {
   var body = document.getElementById('savedListsBody');
@@ -2049,27 +2139,6 @@ function savedListsUpdateCount() {
   if (el) el.textContent = savedLists.length;
 }
 
-/* ════════════════════════════════════════════
-   [NUEVO] MÓDULO: MODO PRO (base preparada)
-   - showProInfo(), openPrivacy()
-   - Estructura lista para integrar pagos
-════════════════════════════════════════════ */
-var PRO_CONFIG = {
-  enabled: false,                  // ← cambiar a true al activar
-  price: '1,99 €',
-  features: ['Sin publicidad','Exportar listas','Backup en la nube','Temas exclusivos']
-};
-
-/** Muestra información del modo Pro */
-function showProInfo() {
-  var msg = '✨ Calc+ Pro\n\n'
-    + PRO_CONFIG.features.map(function(f){ return '• '+f; }).join('\n')
-    + '\n\nPrecio: ' + PRO_CONFIG.price + ' /mes\n'
-    + '(Próximamente disponible)';
-  alert(msg);
-  haptic('medium');
-}
-
 /** Abre la política de privacidad */
 function openPrivacy() {
   openPanel('privacy');
@@ -2103,6 +2172,40 @@ renderCart = function() {
   _updateCartBadge();
 };
 
+/* ══════════════════════════════════════════
+   RESPALDO (exportar / importar JSON)
+══════════════════════════════════════════ */
+var BACKUP_KEYS = ['histV2','cartItems','cartBudget','cartCurrency','baseCurrency','calcTheme','savedCartLists','prevC','splashSeen','tutDone','fxRates','fxUpdated'];
+function backupExport() {
+  var data = { app: 'calcplus', version: '1.1', date: new Date().toISOString(), data: {} };
+  BACKUP_KEYS.forEach(function(k){ try { var v = localStorage.getItem(k); if (v !== null) data.data[k] = v; } catch(e){} });
+  var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  var a = document.createElement('a');
+  var d = new Date();
+  var ds = d.getFullYear() + '-' + ('0' + (d.getMonth()+1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+  a.href = URL.createObjectURL(blob);
+  a.download = 'calcplus-respaldo-' + ds + '.json';
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(a.href); }, 500);
+  showToast('✅ Respaldo exportado'); haptic('medium');
+}
+function backupImport(input) {
+  var f = input.files && input.files[0]; if (!f) return;
+  var rd = new FileReader();
+  rd.onload = function() {
+    try {
+      var obj = JSON.parse(rd.result);
+      if (!obj || obj.app !== 'calcplus' || !obj.data) throw 0;
+      if (!confirm('¿Restaurar este respaldo del ' + String(obj.date || '').slice(0, 10) + '? Se reemplazan los datos actuales.')) { input.value = ''; return; }
+      Object.keys(obj.data).forEach(function(k){ try { localStorage.setItem(k, obj.data[k]); } catch(e){} });
+      showToast('✅ Respaldo restaurado, recargando…');
+      setTimeout(function(){ location.reload(); }, 800);
+    } catch(e) { showToast('Archivo no válido'); haptic('error'); }
+    input.value = '';
+  };
+  rd.readAsText(f);
+}
+
 /* ── INIT ── */
 buildThemes();
 buildCurrencySels();
@@ -2113,6 +2216,12 @@ render();
 _updateCartBadge();
 savedListsUpdateCount();
 budgetRender();
+// Tipos de cambio: mostrar fecha y actualizar si llevan más de 24 h
+fxRenderStatus();
+try {
+  var _lastFx = fxUpdated ? new Date(fxUpdated).getTime() : 0;
+  if (navigator.onLine && (!fxUpdated || (Date.now() - _lastFx) > 24*60*60*1000)) fxUpdate(true);
+} catch(e){}
 
 // Splash + Tutorial: solo la primera vez
 (function() {

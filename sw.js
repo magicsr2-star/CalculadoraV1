@@ -3,7 +3,7 @@
    Funciona completamente sin internet
    ============================================ */
 
-const CACHE_VERSION = 'v1.2';
+const CACHE_VERSION = 'v1.3';
 const CACHE_NAME = `calcplus-${CACHE_VERSION}`;
 
 const ASSETS = [
@@ -49,6 +49,20 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   // Solo manejar peticiones GET
   if (event.request.method !== 'GET') return;
+
+  // Tipos de cambio: red primero, caché solo sin internet
+  if (event.request.url.indexOf('open.er-api.com') !== -1) {
+    event.respondWith(
+      fetch(event.request).then(function(response) {
+        if (response && response.status === 200) {
+          var clone = response.clone();
+          caches.open(CACHE_NAME).then(function(cache){ cache.put(event.request, clone); });
+        }
+        return response;
+      }).catch(function() { return caches.match(event.request); })
+    );
+    return;
+  }
 
   event.respondWith(
     caches.match(event.request).then(cached => {
