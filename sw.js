@@ -3,7 +3,7 @@
    Funciona completamente sin internet
    ============================================ */
 
-const CACHE_VERSION = 'v1.3';
+const CACHE_VERSION = 'v1.4';
 const CACHE_NAME = `calcplus-${CACHE_VERSION}`;
 
 const ASSETS = [

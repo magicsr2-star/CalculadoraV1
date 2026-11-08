@@ -1080,6 +1080,10 @@ body{
 <div class="panel" id="panDisc">
   <div class="phdr"><span class="ptitle">🏷️ Descuentos</span><button class="xbtn" onclick="closeAll()">✕</button></div>
   <div class="pbody">
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <div class="hf sel" id="modeDesc" onclick="setDiscMode('desc')">🏷️ Descuento</div>
+      <div class="hf" id="modeAum" onclick="setDiscMode('aum')">📈 Aumento</div>
+    </div>
     <div class="disc-result-card">
       <div class="disc-final-lbl">Precio final</div>
       <div class="disc-final" id="discFinal">—</div>
@@ -1089,13 +1093,13 @@ body{
     </div>
     <span class="sec-lbl">Precio original</span>
     <input class="inp" id="discPrice" type="number" placeholder="89.99" inputmode="decimal" oninput="calcDisc()">
-    <span class="sec-lbl">Descuento (%)</span>
+    <span class="sec-lbl" id="discPctLbl">Descuento (%)</span>
     <input class="inp" id="discPct" type="number" placeholder="30" min="0" max="100" inputmode="decimal" oninput="calcDisc()">
     <div class="disc-compare" id="discCompare" style="display:none;margin-top:16px">
       <div class="disc-cmp-row"><span class="disc-cmp-lbl">Precio original</span><span class="disc-cmp-val neg" id="dcOrig"></span></div>
-      <div class="disc-cmp-row"><span class="disc-cmp-lbl">Descuento</span><span class="disc-cmp-val pos" id="dcDisc"></span></div>
+      <div class="disc-cmp-row"><span class="disc-cmp-lbl" id="dcDiscLbl">Descuento</span><span class="disc-cmp-val pos" id="dcDisc"></span></div>
       <div class="disc-cmp-row"><span class="disc-cmp-lbl">Precio final</span><span class="disc-cmp-val pos" id="dcFinal"></span></div>
-      <div class="disc-cmp-row"><span class="disc-cmp-lbl">Ahorro total</span><span class="disc-cmp-val pos" id="dcSave"></span></div>
+      <div class="disc-cmp-row"><span class="disc-cmp-lbl" id="dcSaveLbl">Ahorro total</span><span class="disc-cmp-val pos" id="dcSave"></span></div>
     </div>
     <div class="row" style="margin-top:16px;gap:8px">
       <button class="btn-primary" onclick="discToCalc()" style="flex:1">Enviar a calculadora</button>
@@ -1161,7 +1165,7 @@ body{
     <div class="s-row"><div><div class="s-row-label">Importar respaldo</div><div class="s-row-sub">Restaura un respaldo exportado antes</div></div><button class="btn-secondary" style="font-size:11px" onclick="document.getElementById('backupFile').click()">Importar</button></div>
     <input type="file" id="backupFile" accept=".json,application/json" style="display:none" onchange="backupImport(this)">
     <div class="divider"></div>
-    <div class="s-row"><div><div class="s-row-label">Versión</div><div class="s-row-sub">1.1 · Funciona sin internet · Divisas actualizables</div></div></div>
+    <div class="s-row"><div><div class="s-row-label">Versión</div><div class="s-row-sub">1.2 · Funciona sin internet · Divisas actualizables</div></div></div>
     <div class="s-row"><div><div class="s-row-label">Mantén el resultado</div><div class="s-row-sub">Copia el número al portapapeles</div></div></div>
     <div class="s-row"><button class="btn-secondary" style="width:100%;margin-top:4px" onclick="openTutorial();closeAll()">Ver tutorial de nuevo</button></div>
     <div class="divider"></div>
@@ -1669,6 +1673,16 @@ document.addEventListener('click', function(e){
 /* ══════════════════════════════════════════
    DESCUENTOS
 ══════════════════════════════════════════ */
+var discMode = 'desc'; // 'desc' = quitar %, 'aum' = agregar % (margen)
+/** Cambia entre Descuento y Aumento */
+function setDiscMode(m) {
+  discMode = m;
+  document.getElementById('modeDesc').classList.toggle('sel', m === 'desc');
+  document.getElementById('modeAum').classList.toggle('sel', m === 'aum');
+  document.getElementById('discPctLbl').textContent = m === 'aum' ? 'Aumento (%)' : 'Descuento (%)';
+  haptic('light');
+  calcDisc();
+}
 function calcDisc() {
   var price=parseFloat(document.getElementById('discPrice').value)||0;
   var pct=Math.max(0,Math.min(100,parseFloat(document.getElementById('discPct').value)||0));
@@ -1680,25 +1694,27 @@ function calcDisc() {
     document.getElementById('discCompare').style.display='none';
     return;
   }
-  var save=r2(price*pct/100), final=r2(price-save);
+  var delta=r2(price*pct/100), final = discMode==='aum' ? r2(price+delta) : r2(price-delta);
   var fmt2=function(n){ return sym+' '+n.toFixed(2).replace('.',','); };
   document.getElementById('discFinal').textContent=fmt2(final);
-  document.getElementById('discSaving').innerHTML='Ahorras <span>'+fmt2(save)+'</span>';
-  document.getElementById('discBar').style.width=(100-pct)+'%';
+  document.getElementById('discSaving').innerHTML = discMode==='aum' ? 'Ganas <span>'+fmt2(delta)+'</span>' : 'Ahorras <span>'+fmt2(delta)+'</span>';
+  document.getElementById('discBar').style.width = discMode==='aum' ? '100%' : (100-pct)+'%';
   document.getElementById('discBar').style.background=pct>40?'var(--acc)':'var(--acc2)';
-  document.getElementById('discBarL').textContent=pct+'% descuento';
+  document.getElementById('discBarL').textContent=pct+'% '+(discMode==='aum'?'aumento':'descuento');
   document.getElementById('discBarR').textContent=fmt2(price);
   document.getElementById('discCompare').style.display='block';
   document.getElementById('dcOrig').textContent=fmt2(price);
-  document.getElementById('dcDisc').textContent='−'+pct+'%';
+  document.getElementById('dcDisc').textContent=(discMode==='aum'?'+':'−')+pct+'%';
   document.getElementById('dcFinal').textContent=fmt2(final);
-  document.getElementById('dcSave').textContent=fmt2(save);
+  document.getElementById('dcSave').textContent=fmt2(delta);
+  document.getElementById('dcDiscLbl').textContent = discMode==='aum' ? 'Aumento' : 'Descuento';
+  document.getElementById('dcSaveLbl').textContent = discMode==='aum' ? 'Ganancia' : 'Ahorro total';
 }
 function discToCalc() {
   var price=parseFloat(document.getElementById('discPrice').value)||0;
   var pct=parseFloat(document.getElementById('discPct').value)||0;
   if (!price) { haptic('error'); showToast('Introduce un precio'); return; }
-  var final=r2(price-price*pct/100);
+  var final = discMode==='aum' ? r2(price+price*pct/100) : r2(price-price*pct/100);
   cur=String(final); S='A'; n1=0; op=''; render(); closeAll(); showToast('Resultado enviado ✓');
 }
 function discClear() { document.getElementById('discPrice').value=''; document.getElementById('discPct').value=''; calcDisc(); }
